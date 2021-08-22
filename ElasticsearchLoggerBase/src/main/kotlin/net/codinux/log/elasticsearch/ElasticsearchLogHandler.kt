@@ -6,7 +6,7 @@ import java.lang.Exception
 import kotlin.concurrent.thread
 
 
-open class ElasticsearchLogHandler(settings: LoggerSettings) {
+open class ElasticsearchLogHandler(settings: LoggerSettings, protected open val errorHandler: ErrorHandler = StdErrErrorHandler()) {
 
     protected val recordQueue = LinkedBlockingQueue<LogRecord>()
 
@@ -77,11 +77,8 @@ open class ElasticsearchLogHandler(settings: LoggerSettings) {
         logWriter.writeRecord(record)
     }
 
-    protected open fun showError(message: String, e: Throwable) {
-        // where to log error messages to when you're already the logger? :)
-        System.err.println(message + ": " + e.message)
-
-        e.printStackTrace() // like a beginner :)
+    protected open fun showError(message: String, e: Throwable?) {
+        errorHandler.showError(message, e)
     }
 
 }

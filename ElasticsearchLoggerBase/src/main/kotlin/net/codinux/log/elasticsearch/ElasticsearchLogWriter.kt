@@ -16,16 +16,19 @@ import java.time.Instant
 import java.time.format.DateTimeFormatter
 
 
-open class ElasticsearchLogWriter(private val settings: LoggerSettings) : LogWriter {
+open class ElasticsearchLogWriter(
+        protected open val settings: LoggerSettings,
+        protected open val errorHandler: ErrorHandler = StdErrErrorHandler()
+) : LogWriter {
 
     companion object {
-        private val DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+        val DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
     }
 
 
-    protected val restClient: RestHighLevelClient = RestHighLevelClient(RestClient.builder(HttpHost.create(settings.host)))
+    protected open val restClient: RestHighLevelClient = RestHighLevelClient(RestClient.builder(HttpHost.create(settings.host)))
 
-    protected val mapper = ObjectMapper()
+    protected open val mapper = ObjectMapper()
 
 
     override fun writeRecord(record: LogRecord) {
@@ -40,8 +43,7 @@ open class ElasticsearchLogWriter(private val settings: LoggerSettings) : LogWri
             restClient.index(request, RequestOptions.DEFAULT)
         } catch (e: Exception) {
             // TODO: what to do in this case? retry?
-            System.err.println("Could not send record " + record + " to Elasticsearch: " + e.message)
-            e.printStackTrace()
+            errorHandler.showError("Could not send record " + record + " to Elasticsearch", e)
         }
     }
 
