@@ -1,0 +1,22 @@
+plugins {
+    id 'java'
+    id 'org.jetbrains.kotlin.jvm'
+}
+
+def artifactName = "jboss-logger-elasticsearch-logger"
+
+
+
+dependencies {
+    api "net.codinux.log:elasticsearch-logger-base:$version"
+
+    api "org.jboss.logmanager:jboss-logmanager-embedded:1.0.9"
+
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+}
+
+test {
+    useJUnitPlatform()
+}

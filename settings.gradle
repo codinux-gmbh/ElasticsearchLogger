@@ -10,3 +10,7 @@ rootProject.name = "ElasticsearchLogger"
 
 
 include ":ElasticsearchLoggerBase"
+
+include ":JavaUtilLogElasticsearchLogger"
+
+include ":JBossLoggerElasticsearchLogger"
