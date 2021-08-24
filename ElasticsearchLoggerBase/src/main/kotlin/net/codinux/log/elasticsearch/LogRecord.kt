@@ -3,7 +3,7 @@ package net.codinux.log.elasticsearch
 import java.time.Instant
 
 
-open class LogRecord(
+open class LogRecord @JvmOverloads constructor(
     open val message: String,
 
     open val timestamp: Instant,
@@ -16,7 +16,7 @@ open class LogRecord(
 
     open val host: String,
 
-    open val exception: Throwable?,
+    open val exception: Throwable? = null,
 
-    open val mdc: Map<String, String>?
+    open val mdc: Map<String, String>? = null
 )

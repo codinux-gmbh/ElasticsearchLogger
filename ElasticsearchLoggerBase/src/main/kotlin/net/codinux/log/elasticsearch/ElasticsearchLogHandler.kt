@@ -6,7 +6,10 @@ import java.lang.Exception
 import kotlin.concurrent.thread
 
 
-open class ElasticsearchLogHandler(settings: LoggerSettings, protected open val errorHandler: ErrorHandler = StdErrErrorHandler()) {
+open class ElasticsearchLogHandler @JvmOverloads constructor(
+        settings: LoggerSettings,
+        protected open val errorHandler: ErrorHandler = StdErrErrorHandler()
+) {
 
     protected val recordQueue = LinkedBlockingQueue<LogRecord>()
 

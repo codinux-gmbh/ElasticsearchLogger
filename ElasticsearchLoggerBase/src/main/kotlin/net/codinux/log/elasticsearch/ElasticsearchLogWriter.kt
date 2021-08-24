@@ -43,7 +43,7 @@ open class ElasticsearchLogWriter(
             restClient.index(request, RequestOptions.DEFAULT)
         } catch (e: Exception) {
             // TODO: what to do in this case? retry?
-            errorHandler.showError("Could not send record " + record + " to Elasticsearch", e)
+            errorHandler.showError("Could not send record $record to Elasticsearch", e)
         }
     }
 
