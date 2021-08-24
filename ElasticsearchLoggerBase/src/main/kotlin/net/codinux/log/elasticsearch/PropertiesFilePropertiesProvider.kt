@@ -1,5 +1,6 @@
 package net.codinux.log.elasticsearch
 
+import net.codinux.log.elasticsearch.errorhandler.StdErrErrorHandler
 import java.lang.Exception
 import java.util.*
 

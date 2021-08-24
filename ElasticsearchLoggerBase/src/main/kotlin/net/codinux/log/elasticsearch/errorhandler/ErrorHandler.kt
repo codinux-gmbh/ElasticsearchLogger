@@ -1,4 +1,4 @@
-package net.codinux.log.elasticsearch
+package net.codinux.log.elasticsearch.errorhandler
 
 
 interface ErrorHandler {

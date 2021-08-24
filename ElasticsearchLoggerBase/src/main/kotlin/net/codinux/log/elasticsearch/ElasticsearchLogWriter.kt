@@ -1,6 +1,9 @@
 package net.codinux.log.elasticsearch
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import net.codinux.log.elasticsearch.errorhandler.ErrorHandler
+import net.codinux.log.elasticsearch.errorhandler.OnlyOnceErrorHandler
+import net.codinux.log.elasticsearch.errorhandler.StdErrErrorHandler
 import org.elasticsearch.client.RestHighLevelClient
 import org.elasticsearch.action.index.IndexRequest
 import org.elasticsearch.common.xcontent.XContentType
@@ -18,7 +21,7 @@ import java.time.format.DateTimeFormatter
 
 open class ElasticsearchLogWriter(
         protected open val settings: LoggerSettings,
-        protected open val errorHandler: ErrorHandler = StdErrErrorHandler()
+        protected open val errorHandler: ErrorHandler = OnlyOnceErrorHandler(StdErrErrorHandler())
 ) : LogWriter {
 
     companion object {

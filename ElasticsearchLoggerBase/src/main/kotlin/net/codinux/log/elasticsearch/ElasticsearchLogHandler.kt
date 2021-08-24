@@ -1,5 +1,8 @@
 package net.codinux.log.elasticsearch
 
+import net.codinux.log.elasticsearch.errorhandler.ErrorHandler
+import net.codinux.log.elasticsearch.errorhandler.OnlyOnceErrorHandler
+import net.codinux.log.elasticsearch.errorhandler.StdErrErrorHandler
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicBoolean
 import java.lang.Exception
@@ -8,7 +11,7 @@ import kotlin.concurrent.thread
 
 open class ElasticsearchLogHandler @JvmOverloads constructor(
         settings: LoggerSettings,
-        protected open val errorHandler: ErrorHandler = StdErrErrorHandler()
+        protected open val errorHandler: ErrorHandler = OnlyOnceErrorHandler(StdErrErrorHandler())
 ) {
 
     protected val recordQueue = LinkedBlockingQueue<LogRecord>()
@@ -27,7 +30,7 @@ open class ElasticsearchLogHandler @JvmOverloads constructor(
     }
 
     protected open fun createLogWriter(settings: LoggerSettings): ElasticsearchLogWriter {
-        return ElasticsearchLogWriter(settings)
+        return ElasticsearchLogWriter(settings, errorHandler)
     }
 
 
