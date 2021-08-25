@@ -52,9 +52,11 @@ open class ElasticsearchLogHandler @JvmOverloads constructor(
     open fun close() {
         try {
             isRunning.set(false)
-            workerThread.join()
+            workerThread.join(100)
 
             flush()
+
+            logWriter.close()
         } catch (e: Exception) {
             showError("Could not stop worker thread", e)
         }

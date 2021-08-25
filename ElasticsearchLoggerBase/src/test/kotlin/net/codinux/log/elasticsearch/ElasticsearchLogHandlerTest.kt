@@ -6,6 +6,7 @@ import com.github.tomakehurst.wiremock.http.HttpHeader
 import com.github.tomakehurst.wiremock.http.HttpHeaders
 import com.github.tomakehurst.wiremock.matching.EqualToPattern
 import net.codinux.log.elasticsearch.errorhandler.ErrorHandler
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -13,6 +14,7 @@ import org.mockito.Mockito.mock
 import java.time.Instant
 import java.util.concurrent.TimeUnit
 import java.util.logging.Level
+import kotlin.math.roundToInt
 
 class ElasticsearchLogHandlerTest {
 
@@ -26,7 +28,7 @@ class ElasticsearchLogHandlerTest {
 
         private const val IndexName = "test-index"
 
-        private const val ExceptedElasticsearchUrl = "/$IndexName/_doc"
+        private const val ExceptedElasticsearchUrl = "/_bulk"
 
         private const val Message = "Something terrible happened"
 
@@ -39,6 +41,8 @@ class ElasticsearchLogHandlerTest {
         private const val ThreadName = "MainThread"
 
         private const val HostName = "localhost"
+
+        private const val MaxLogRecordsPerBatch = 10
 
 
         private const val ElasticsearchInfoResponseBody = "{\n" +
@@ -59,8 +63,9 @@ class ElasticsearchLogHandlerTest {
                 "  \"tagline\" : \"You Know, for Search\"\n" +
                 "}\n"
 
-        private const val IndexingResponse = "{\"_index\":\"$IndexName\",\"_type\":\"_doc\",\"_id\":\"mg_YeXsBE814VrTbzBWn\",\"_version\":1,\"result\":\"created\"," +
-                "\"_shards\":{\"total\":2,\"successful\":1,\"failed\":0},\"_seq_no\":6,\"_primary_term\":1}"
+        private const val IndexingResponse = "{\"took\":8,\"errors\":false,\"items\":[{\"index\":{\"_index\":\"$IndexName\",\"_type\":\"_doc\"," +
+                "\"_id\":\"7rI3f3sBzy23N1EWgjPP\",\"_version\":1,\"result\":\"created\",\"_shards\":{\"total\":2,\"successful\":1,\"failed\":0}," +
+                "\"_seq_no\":9,\"_primary_term\":2,\"status\":201}}]}"
 
         private val ElasticsearchResponseHeaders = HttpHeaders(
                 HttpHeader("X-elastic-product", "Elasticsearch"),
@@ -70,7 +75,7 @@ class ElasticsearchLogHandlerTest {
 
     private val esMock = WireMockServer(Port)
 
-    private val settings = LoggerSettings(host = "$Scheme://$Host:$Port", indexName = IndexName)
+    private val settings = LoggerSettings(host = "$Scheme://$Host:$Port", indexName = IndexName, maxLogRecordsPerBatch = MaxLogRecordsPerBatch)
 
     private val errorHandlerMock = mock(ErrorHandler::class.java)
 
@@ -86,6 +91,8 @@ class ElasticsearchLogHandlerTest {
 
     @AfterEach
     fun tearDown() {
+        underTest.close()
+
         esMock.stop()
     }
 
@@ -113,8 +120,7 @@ class ElasticsearchLogHandlerTest {
         val mdcValue1 = "MdcValue1"
         val mdcKey2 = "MdcKey2"
         val mdcValue2 = "MdcValue2"
-        val mdc = mapOf(mdcKey1 to mdcValue1, mdcKey2 to mdcValue2
-        )
+        val mdc = mapOf(mdcKey1 to mdcValue1, mdcKey2 to mdcValue2)
         val record = LogRecord(Message, Timestamp, LogLevel, LoggerName, ThreadName, HostName, mdc = mdc)
 
         mockIndexingSuccessResponse()
@@ -149,20 +155,78 @@ class ElasticsearchLogHandlerTest {
     }
 
 
+    @Test
+    fun maxLogRecordsPerBatch() {
+        val countRecords = MaxLogRecordsPerBatch
+
+        sendMultipleRecords(countRecords)
+
+
+        // only one request has been sent
+        esMock.verify(1, postRequestedFor(urlPathEqualTo(ExceptedElasticsearchUrl)))
+
+        val requestBody = esMock.findAll(postRequestedFor(urlPathEqualTo(ExceptedElasticsearchUrl))).first().bodyAsString
+        verifyCountRecordsInBatch(requestBody, countRecords)
+    }
+
+    @Test
+    fun moreThanMaxLogRecordsPerBatch() {
+        val countRecords = (MaxLogRecordsPerBatch * 1.5).roundToInt()
+
+        sendMultipleRecords(countRecords)
+
+        waitTillAsynchronousProcessingDone() // two batches -> we need to wait double the time
+
+
+        // verify records have been sent batched in two request has been sent
+        esMock.verify(2, postRequestedFor(urlPathEqualTo(ExceptedElasticsearchUrl)))
+
+        val requests = esMock.findAll(postRequestedFor(urlPathEqualTo(ExceptedElasticsearchUrl)))
+
+        val firstRequestBody = requests.first().bodyAsString
+        verifyCountRecordsInBatch(firstRequestBody, MaxLogRecordsPerBatch)
+
+        val secondRequestBody = requests.get(1).bodyAsString
+        verifyCountRecordsInBatch(secondRequestBody, countRecords - MaxLogRecordsPerBatch)
+    }
+
+    private fun verifyCountRecordsInBatch(requestBody: String, countRecords: Int) {
+        assertThat(countOccurrences(requestBody, "\"message\":\"$Message\"")).isEqualTo(countRecords)
+        assertThat(countOccurrences(requestBody, "\"level\":\"$LogLevel\"")).isEqualTo(countRecords)
+    }
+
+    private fun sendMultipleRecords(countRecords: Int) {
+        val record = LogRecord(Message, Timestamp, LogLevel, LoggerName, ThreadName, HostName)
+
+        mockIndexingSuccessResponse()
+
+
+        for (i in 0 until countRecords) {
+            underTest.handle(record)
+        }
+
+        waitTillAsynchronousProcessingDone()
+    }
+
+    private fun countOccurrences(string: String, patternToFind: String): Int {
+        return string.windowed(patternToFind.length).count { it == patternToFind }
+    }
+
+
     private fun mockIndexingSuccessResponse() {
-        esMock.stubFor(post(urlEqualTo(ExceptedElasticsearchUrl))
+        esMock.stubFor(post(urlPathEqualTo(ExceptedElasticsearchUrl))
                 .withHeader("content-type", EqualToPattern("application/json"))
                 .willReturn(ok().withHeaders(ElasticsearchResponseHeaders).withBody(IndexingResponse)))
     }
 
     private fun mockElasticsearchInfoRequest() {
-        esMock.stubFor(get(anyUrl())
+        esMock.stubFor(get(urlPathEqualTo("/"))
                 .willReturn(ok().withHeaders(ElasticsearchResponseHeaders).withBody(ElasticsearchInfoResponseBody)))
     }
 
     private fun waitTillAsynchronousProcessingDone() {
         underTest.flush()
-        TimeUnit.MILLISECONDS.sleep(500)
+        TimeUnit.MILLISECONDS.sleep(settings.sendLogRecordsPeriodMillis * 4)
     }
 
 }

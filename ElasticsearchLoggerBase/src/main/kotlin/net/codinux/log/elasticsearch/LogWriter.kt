@@ -5,4 +5,6 @@ interface LogWriter {
 
     fun writeRecord(record: LogRecord)
 
+    fun close()
+
 }

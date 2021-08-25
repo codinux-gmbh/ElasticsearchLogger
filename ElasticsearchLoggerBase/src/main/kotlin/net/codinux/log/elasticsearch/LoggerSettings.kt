@@ -29,6 +29,10 @@ open class LoggerSettings(
         open var stacktraceFieldName: String = StacktraceDefaultFieldName,
 
         open var includeMdc: Boolean = IncludeMdcDefaultValue,
+
+        open var maxLogRecordsPerBatch: Int = MaxLogRecordsPerBatchDefaultValue,
+        open var maxBufferedLogRecords: Int = MaxBufferedLogRecordsDefaultValue,
+        open var sendLogRecordsPeriodMillis: Long = SendLogRecordsPeriodMillisDefaultValue
 ) {
 
     companion object {
@@ -61,6 +65,10 @@ open class LoggerSettings(
         const val StacktraceDefaultFieldName = "stacktrace"
 
         const val IncludeMdcDefaultValue = true
+
+        const val MaxLogRecordsPerBatchDefaultValue = 200
+        const val MaxBufferedLogRecordsDefaultValue = 2000
+        const val SendLogRecordsPeriodMillisDefaultValue = 100L
 
     }
 

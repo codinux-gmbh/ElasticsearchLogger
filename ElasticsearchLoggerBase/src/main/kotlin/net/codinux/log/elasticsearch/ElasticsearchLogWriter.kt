@@ -13,10 +13,16 @@ import java.time.ZonedDateTime
 import java.time.ZoneOffset
 import org.elasticsearch.client.RestClient
 import org.apache.http.HttpHost
+import org.elasticsearch.action.bulk.BulkRequest
 import java.io.StringWriter
-import java.lang.Exception
 import java.time.Instant
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.Exception
+import kotlin.concurrent.thread
 
 
 open class ElasticsearchLogWriter(
@@ -25,13 +31,78 @@ open class ElasticsearchLogWriter(
 ) : LogWriter {
 
     companion object {
-        val DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+        val TimestampFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSSZ")
     }
 
+
+    protected open val recordsQueue = CopyOnWriteArrayList<String>()
 
     protected open val restClient: RestHighLevelClient = RestHighLevelClient(RestClient.builder(HttpHost.create(settings.host)))
 
     protected open val mapper = ObjectMapper()
+
+    protected open val handleRecords = AtomicBoolean(true)
+
+    protected open val workerThread = thread(name = "Send logs to Elasticsearch") {
+        sendData()
+    }
+
+    private fun sendData() {
+        // TODO: may simple use a REST client and create POST oneself
+
+        while (handleRecords.get()) {
+            if (recordsQueue.isNotEmpty()) {
+                try {
+                    val recordsToSend = calculateRecordsToSend()
+                    val bulkRequest = createBulkRequest(recordsToSend)
+
+                    val response = restClient.bulk(bulkRequest, RequestOptions.DEFAULT)
+                    if (response.hasFailures()) {
+                        recordsQueue.addAll(recordsQueue.size, recordsToSend) // append again at end of queue
+                        errorHandler.showError("Could not send log records to Elasticsearch: ${response.status()} ${response.buildFailureMessage()}", null)
+                    }
+                } catch (e: Exception) {
+                    errorHandler.showError("Could not send calculate next batch to send to Elasticsearch", e)
+                }
+            }
+
+            TimeUnit.MILLISECONDS.sleep(settings.sendLogRecordsPeriodMillis)
+        }
+    }
+
+    private fun createBulkRequest(recordsToSend: List<String>): BulkRequest {
+        val bulkRequest = BulkRequest(settings.indexName)
+
+        recordsToSend.forEach { recordJson ->
+            val request = IndexRequest(settings.indexName)
+            request.source(recordJson, XContentType.JSON)
+            bulkRequest.add(request)
+        }
+
+        return bulkRequest
+    }
+
+    private fun calculateRecordsToSend(): List<String> {
+        val size = recordsQueue.size
+
+        if (size <= settings.maxLogRecordsPerBatch) {
+            val recordsToSend = ArrayList(recordsQueue)
+
+            recordsQueue.clear()
+
+            return recordsToSend
+        }
+        else {
+            val fromIndex = size - settings.maxLogRecordsPerBatch
+            val recordsToSend = ArrayList(recordsQueue.subList(fromIndex, size)) // make a copy
+
+            while (recordsQueue.size > fromIndex) {
+                recordsQueue.removeAt(fromIndex) // do not call removeAll() as if other records have the same JSON string than all matching strings get removed
+            }
+
+            return recordsToSend;
+        }
+    }
 
 
     override fun writeRecord(record: LogRecord) {
@@ -40,15 +111,27 @@ open class ElasticsearchLogWriter(
 
             val recordJson = mapper.writeValueAsString(esRecord)
 
-            val request = IndexRequest(settings.indexName)
-            request.source(recordJson, XContentType.JSON)
+            recordsQueue.add(recordJson)
 
-            restClient.index(request, RequestOptions.DEFAULT)
+            while (recordsQueue.size > settings.maxBufferedLogRecords) {
+                recordsQueue.removeLast()
+            }
         } catch (e: Exception) {
-            // TODO: what to do in this case? retry?
-            errorHandler.showError("Could not send record $record to Elasticsearch", e)
+            errorHandler.showError("Could not queue record $record to send to Elasticsearch", e)
         }
     }
+
+
+    override fun close() {
+        try {
+            handleRecords.set(false)
+
+            workerThread.join(100)
+        } catch (e: Exception) {
+            System.err.println("Could not stop ElasticsearchLogWriter")
+        }
+    }
+
 
     protected open fun createEsRecord(record: LogRecord): Map<String, Any?> {
         val esRecord = mutableMapOf<String, Any>()
@@ -100,7 +183,7 @@ open class ElasticsearchLogWriter(
             return timestamp.toEpochMilli()
         }
 
-        return ZonedDateTime.ofInstant(timestamp, ZoneOffset.UTC).format(DATE_FORMATTER)
+        return ZonedDateTime.ofInstant(timestamp, ZoneOffset.UTC).format(TimestampFormatter)
     }
 
 }
