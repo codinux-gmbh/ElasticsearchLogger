@@ -16,6 +16,9 @@ open class LoggerSettings(
         open var includeLogLevel: Boolean = IncludeLogLevelDefaultValue,
         open var logLevelFieldName: String = LogLevelDefaultFieldName,
 
+        open var includeLogger: Boolean = IncludeLoggerDefaultValue,
+        open var loggerFieldName: String = LoggerDefaultFieldName,
+
         open var includeLoggerName: Boolean = IncludeLoggerNameDefaultValue,
         open var loggerNameFieldName: String = LoggerNameDefaultFieldName,
 
@@ -52,8 +55,11 @@ open class LoggerSettings(
         const val IncludeLogLevelDefaultValue = true
         const val LogLevelDefaultFieldName = "level"
 
-        const val IncludeLoggerNameDefaultValue = true
-        const val LoggerNameDefaultFieldName = "logger"
+        const val IncludeLoggerDefaultValue = true
+        const val LoggerDefaultFieldName = "logger"
+
+        const val IncludeLoggerNameDefaultValue = false
+        const val LoggerNameDefaultFieldName = "loggername"
 
         const val IncludeThreadNameDefaultValue = true
         const val ThreadNameDefaultFieldName = "thread"

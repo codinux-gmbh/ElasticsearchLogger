@@ -16,7 +16,6 @@ import org.apache.http.HttpHost
 import org.elasticsearch.action.bulk.BulkRequest
 import java.io.StringWriter
 import java.time.Instant
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
@@ -146,7 +145,16 @@ open class ElasticsearchLogWriter(
         esRecord[settings.timestampFieldName] = formatTimestamp(record.timestamp)
 
         conditionallyAdd(esRecord, settings.includeLogLevel, settings.logLevelFieldName, record.level)
-        conditionallyAdd(esRecord, settings.includeLoggerName, settings.loggerNameFieldName, record.logger)
+        conditionallyAdd(esRecord, settings.includeLogger, settings.loggerFieldName, record.logger)
+
+        if (settings.includeLoggerName) { // loggerName is in most cases full qualified class name including packages, try to extract only name of class
+            var loggerName = record.logger
+            val indexOfDot = loggerName.lastIndexOf('.')
+            if (indexOfDot >= 0) {
+                loggerName = loggerName.substring(indexOfDot + 1)
+            }
+            esRecord[settings.loggerFieldName] = loggerName
+        }
 
         conditionallyAdd(esRecord, settings.includeThreadName, settings.threadNameFieldName, record.threadName)
         conditionallyAdd(esRecord, settings.includeHostName, settings.hostNameFieldName, record.host)

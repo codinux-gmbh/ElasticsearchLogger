@@ -36,7 +36,9 @@ class ElasticsearchLogHandlerTest {
 
         private val LogLevel = Level.INFO.name
 
-        private const val LoggerName = "com.example.MyFancyClass"
+        private const val LoggerClassName = "MyFancyClass"
+
+        private const val LoggerFullQualifiedName = "com.example.$LoggerClassName"
 
         private const val ThreadName = "MainThread"
 
@@ -99,7 +101,7 @@ class ElasticsearchLogHandlerTest {
 
     @Test
     fun logInfoMessage() {
-        val record = LogRecord(Message, Timestamp, LogLevel, LoggerName, ThreadName, HostName)
+        val record = LogRecord(Message, Timestamp, LogLevel, LoggerFullQualifiedName, ThreadName, HostName)
 
         mockIndexingSuccessResponse()
 
@@ -121,7 +123,7 @@ class ElasticsearchLogHandlerTest {
         val mdcKey2 = "MdcKey2"
         val mdcValue2 = "MdcValue2"
         val mdc = mapOf(mdcKey1 to mdcValue1, mdcKey2 to mdcValue2)
-        val record = LogRecord(Message, Timestamp, LogLevel, LoggerName, ThreadName, HostName, mdc = mdc)
+        val record = LogRecord(Message, Timestamp, LogLevel, LoggerFullQualifiedName, ThreadName, HostName, mdc = mdc)
 
         mockIndexingSuccessResponse()
 
@@ -140,7 +142,7 @@ class ElasticsearchLogHandlerTest {
     fun logStacktrace() {
         val errorMessage = "Just a test exception. No one was hurt during the creation of it"
         val exception = Exception(errorMessage)
-        val record = LogRecord(Message, Timestamp, LogLevel, LoggerName, ThreadName, HostName, exception)
+        val record = LogRecord(Message, Timestamp, LogLevel, LoggerFullQualifiedName, ThreadName, HostName, exception)
 
         mockIndexingSuccessResponse()
 
@@ -152,6 +154,23 @@ class ElasticsearchLogHandlerTest {
 
         esMock.verify(postRequestedFor(urlPathEqualTo(ExceptedElasticsearchUrl))
                 .withRequestBody(containing("\"stacktrace\":\"java.lang.Exception: $errorMessage")))
+    }
+
+    @Test
+    fun logOnlyLoggerName() {
+        settings.includeLoggerName = true
+        val record = LogRecord(Message, Timestamp, LogLevel, LoggerFullQualifiedName, ThreadName, HostName)
+
+        mockIndexingSuccessResponse()
+
+
+        underTest.handle(record)
+
+        waitTillAsynchronousProcessingDone()
+
+
+        esMock.verify(postRequestedFor(urlPathEqualTo(ExceptedElasticsearchUrl))
+                .withRequestBody(containing("\"${LoggerSettings.LoggerNameDefaultFieldName}\":\"$LoggerClassName")))
     }
 
 
@@ -196,7 +215,7 @@ class ElasticsearchLogHandlerTest {
     }
 
     private fun sendMultipleRecords(countRecords: Int) {
-        val record = LogRecord(Message, Timestamp, LogLevel, LoggerName, ThreadName, HostName)
+        val record = LogRecord(Message, Timestamp, LogLevel, LoggerFullQualifiedName, ThreadName, HostName)
 
         mockIndexingSuccessResponse()
 
