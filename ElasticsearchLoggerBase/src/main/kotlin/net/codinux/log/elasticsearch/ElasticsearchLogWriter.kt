@@ -47,6 +47,12 @@ open class ElasticsearchLogWriter(
         sendData()
     }
 
+
+    init {
+        println("Logging to index '${settings.indexName}' on host ${settings.host}")
+    }
+
+
     private fun sendData() {
         // TODO: may simple use a REST client and create POST oneself
 
