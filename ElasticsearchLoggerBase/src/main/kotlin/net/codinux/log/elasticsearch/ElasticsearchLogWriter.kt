@@ -147,14 +147,8 @@ open class ElasticsearchLogWriter(
         conditionallyAdd(esRecord, settings.includeLogLevel, settings.logLevelFieldName, record.level)
         conditionallyAdd(esRecord, settings.includeLogger, settings.loggerFieldName, record.logger)
 
-        if (settings.includeLoggerName) { // loggerName is in most cases full qualified class name including packages, try to extract only name of class
-            var loggerName = record.logger
-            val indexOfDot = loggerName.lastIndexOf('.')
-            if (indexOfDot >= 0) {
-                loggerName = loggerName.substring(indexOfDot + 1)
-            }
-            esRecord[settings.loggerFieldName] = loggerName
-        }
+        // loggerName is in most cases full qualified class name including packages, try to extract only name of class
+        conditionallyAdd(esRecord, settings.includeLoggerName, settings.loggerNameFieldName) { extractLoggerName(record) }
 
         conditionallyAdd(esRecord, settings.includeThreadName, settings.threadNameFieldName, record.threadName)
         conditionallyAdd(esRecord, settings.includeHostName, settings.hostNameFieldName, record.host)
@@ -185,12 +179,6 @@ open class ElasticsearchLogWriter(
         }
     }
 
-    protected open fun extractStacktrace(record: LogRecord): String {
-        val writer = StringWriter()
-        record.exception?.printStackTrace(PrintWriter(writer))
-
-        return writer.toString()
-    }
 
     protected open fun formatTimestamp(timestamp: Instant): Any {
         if (settings.timestampFormat === TimestampFormat.MILLIS_SINCE_EPOCH) {
@@ -198,6 +186,24 @@ open class ElasticsearchLogWriter(
         }
 
         return ZonedDateTime.ofInstant(timestamp, ZoneOffset.UTC).format(TimestampFormatter)
+    }
+
+    protected open fun extractStacktrace(record: LogRecord): String {
+        val writer = StringWriter()
+        record.exception?.printStackTrace(PrintWriter(writer))
+
+        return writer.toString()
+    }
+
+    private fun extractLoggerName(record: LogRecord): String {
+        var loggerName = record.logger
+
+        val indexOfDot = loggerName.lastIndexOf('.')
+        if (indexOfDot >= 0) {
+            loggerName = loggerName.substring(indexOfDot + 1)
+        }
+
+        return loggerName
     }
 
 }
