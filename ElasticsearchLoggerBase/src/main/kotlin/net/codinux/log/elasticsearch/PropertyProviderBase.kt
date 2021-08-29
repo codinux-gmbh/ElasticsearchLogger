@@ -46,7 +46,11 @@ abstract class PropertyProviderBase {
                 getIncludeField("stacktrace", LoggerSettings.IncludeStacktraceDefaultValue),
                 getFieldName("stacktrace", LoggerSettings.StacktraceDefaultFieldName),
 
-                getIncludeField("mdc", LoggerSettings.IncludeMdcDefaultValue)
+                getIncludeField("mdc", LoggerSettings.IncludeMdcDefaultValue),
+
+                getIntProperty("maxlogrecordperbatch", LoggerSettings.MaxLogRecordsPerBatchDefaultValue),
+                getIntProperty("maxbufferedlogrecords", LoggerSettings.MaxBufferedLogRecordsDefaultValue),
+                getLongProperty("sendlogrecordsperiodmillis", LoggerSettings.SendLogRecordsPeriodMillisDefaultValue)
         )
     }
 
@@ -57,6 +61,14 @@ abstract class PropertyProviderBase {
 
     protected open fun getFieldName(fieldName: String, defaultValue: String): String {
         return getElasticsearchProperty(fieldName + FIELD_NAME_KEY) ?: defaultValue
+    }
+
+    protected open fun getIntProperty(propertyName: String, defaultValue: Int): Int {
+        return getElasticsearchProperty(propertyName)?.let { it.toInt() } ?: defaultValue
+    }
+
+    protected open fun getLongProperty(propertyName: String, defaultValue: Long): Long {
+        return getElasticsearchProperty(propertyName)?.let { it.toLong() } ?: defaultValue
     }
 
     protected open fun getBooleanProperty(propertyName: String, defaultValue: Boolean): Boolean {
