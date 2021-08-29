@@ -25,14 +25,17 @@ abstract class PropertyProviderBase {
 
                 getFieldName("message", LoggerSettings.MessageDefaultFieldName),
 
-                getFieldName("timestamp", LoggerSettings.TimestampDefaultFieldName),
                 getTimestampFormat() ?: LoggerSettings.TimestampDefaultFormat,
+                getFieldName("timestamp", LoggerSettings.TimestampDefaultFieldName),
 
                 getIncludeField("level", LoggerSettings.IncludeLogLevelDefaultValue),
                 getFieldName("level", LoggerSettings.LogLevelDefaultFieldName),
 
-                getIncludeField("logger", LoggerSettings.IncludeLoggerNameDefaultValue),
-                getFieldName("logger", LoggerSettings.LoggerNameDefaultFieldName),
+                getIncludeField("logger", LoggerSettings.IncludeLoggerDefaultValue),
+                getFieldName("logger", LoggerSettings.LoggerDefaultFieldName),
+
+                getIncludeField("loggername", LoggerSettings.IncludeLoggerNameDefaultValue),
+                getFieldName("loggername", LoggerSettings.LoggerNameDefaultFieldName),
 
                 getIncludeField("hostName", LoggerSettings.IncludeHostNameDefaultValue),
                 getFieldName("hostName", LoggerSettings.HostNameDefaultFieldName),

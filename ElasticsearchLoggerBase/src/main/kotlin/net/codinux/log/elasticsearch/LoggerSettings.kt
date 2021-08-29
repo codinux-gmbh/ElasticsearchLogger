@@ -10,8 +10,8 @@ open class LoggerSettings(
 
         open var messageFieldName: String = MessageDefaultFieldName,
 
-        open var timestampFieldName: String = TimestampDefaultFieldName,
         open var timestampFormat: TimestampFormat = TimestampDefaultFormat,
+        open var timestampFieldName: String = TimestampDefaultFieldName,
 
         open var includeLogLevel: Boolean = IncludeLogLevelDefaultValue,
         open var logLevelFieldName: String = LogLevelDefaultFieldName,
@@ -48,9 +48,8 @@ open class LoggerSettings(
 
         const val MessageDefaultFieldName = "message"
 
-        const val TimestampDefaultFieldName = "@timestamp"
-
         val TimestampDefaultFormat = TimestampFormat.FORMATTED_DATE_TIME
+        const val TimestampDefaultFieldName = "@timestamp"
 
         const val IncludeLogLevelDefaultValue = true
         const val LogLevelDefaultFieldName = "level"
