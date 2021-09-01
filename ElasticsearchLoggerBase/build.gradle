@@ -3,7 +3,9 @@ plugins {
     id "org.jetbrains.kotlin.jvm"
 }
 
-def artifactName = "elasticsearch-logger-base"
+ext.artifactName = "elasticsearch-logger-base"
+
+ext.projectDescription = "The base implementation for logging to Elasticsearch"
 
 
 dependencies {
@@ -25,4 +27,8 @@ dependencies {
     testImplementation "org.mockito.kotlin:mockito-kotlin:3.2.0"
 
     testImplementation "org.assertj:assertj-core:3.20.2"
+}
+
+test {
+    useJUnitPlatform()
 }

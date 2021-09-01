@@ -11,6 +11,24 @@ buildscript {
 }
 
 
+def commonScriptsFile = new File(new File(project.gradle.gradleUserHomeDir, "scripts"), "commonScripts.gradle")
+if (commonScriptsFile.exists()) {
+    apply from: commonScriptsFile
+}
+
+
+ext.sourceCodeRepositoryBaseUrl = "https://github.com/codinux-gmbh/ElasticsearchLogger"
+
+ext.useNewSonatypeRepo = true
+ext.packageGroup = "net.codinux"
+
+ext.developerId = "codinux"
+ext.developerName = "codinux GmbH & Co. KG"
+ext.developerMail = "git@codinux.net"
+
+ext.licenseName = "The Apache License, Version 2.0"
+ext.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+
 allprojects {
     repositories {
         mavenLocal()

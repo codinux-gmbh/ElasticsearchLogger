@@ -3,7 +3,9 @@ plugins {
     id 'org.jetbrains.kotlin.jvm'
 }
 
-def artifactName = "java-util-log-elasticsearch-logger"
+ext.artifactName = "java-util-log-elasticsearch-logger"
+
+ext.projectDescription = "Provides logging to Elasticsearch for Java Util Log"
 
 
 dependencies {
