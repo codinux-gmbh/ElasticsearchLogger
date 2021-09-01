@@ -10,14 +10,14 @@ Contains implementations for various logging frameworks to log records to Elasti
 <dependency>
     <groupId>net.codinux.log</groupId>
     <artifactId>jboss-logger-elasticsearch-logger</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```
-implementation 'net.codinux.log:jboss-logger-elasticsearch-logger:1.0.0-SNAPSHOT'
+implementation 'net.codinux.log:jboss-logger-elasticsearch-logger:1.0.0'
 ```
 
 ## Java Util Log
@@ -28,14 +28,14 @@ implementation 'net.codinux.log:jboss-logger-elasticsearch-logger:1.0.0-SNAPSHOT
 <dependency>
     <groupId>net.codinux.log</groupId>
     <artifactId>java-util-log-elasticsearch-logger</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```
-implementation 'net.codinux.log:java-util-log-elasticsearch-logger:1.0.0-SNAPSHOT'
+implementation 'net.codinux.log:java-util-log-elasticsearch-logger:1.0.0'
 ```
 
 # License
