@@ -1,18 +1,17 @@
 package net.codinux.log.elasticsearch
 
+import net.codinux.log.elasticsearch.errorhandler.ErrorHandler
+import net.codinux.log.elasticsearch.errorhandler.JavaUtilLogErrorHandler
 import java.net.InetAddress
 import java.util.logging.Handler
 
 
-open class JavaUtilLogElasticsearchLogHandler : Handler() {
+open class JavaUtilLogElasticsearchLogHandler @JvmOverloads constructor(
+    settings: LoggerSettings = JavaUtilLogPropertyProvider().extractSettings(),
+    errorHandler: ErrorHandler = JavaUtilLogErrorHandler()
+) : Handler() {
 
-    protected open val elasticsearchLogHandler: ElasticsearchLogHandler
-
-
-    init {
-        val settings = JavaUtilLogPropertyProvider().extractSettings()
-        elasticsearchLogHandler = ElasticsearchLogHandler(settings)
-    }
+    protected open val elasticsearchLogHandler = ElasticsearchLogHandler(settings, errorHandler)
 
 
     override fun publish(record: java.util.logging.LogRecord?) {
