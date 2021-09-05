@@ -3,6 +3,6 @@ package net.codinux.log.elasticsearch.errorhandler
 
 interface ErrorHandler {
 
-    fun showError(message: String, e: Throwable?)
+    fun logError(message: String, e: Throwable? = null)
 
 }

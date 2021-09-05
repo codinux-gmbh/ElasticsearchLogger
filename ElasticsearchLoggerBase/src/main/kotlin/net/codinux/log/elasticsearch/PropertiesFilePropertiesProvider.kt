@@ -28,7 +28,7 @@ open class PropertiesFilePropertiesProvider : PropertyProviderBase() {
             }
             properties.load(inputStream)
         } catch (e: Exception) {
-            StdErrErrorHandler().showError("Could not read logging properties from " + FILE_NAME , e) // TODO: make ErrorHandler configurable
+            StdErrErrorHandler().logError("Could not read logging properties from " + FILE_NAME , e) // TODO: make ErrorHandler configurable
         }
     }
 

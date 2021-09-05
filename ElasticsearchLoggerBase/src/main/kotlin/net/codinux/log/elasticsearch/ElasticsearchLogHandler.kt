@@ -86,7 +86,7 @@ open class ElasticsearchLogHandler @JvmOverloads constructor(
     }
 
     protected open fun showError(message: String, e: Throwable?) {
-        errorHandler.showError(message, e)
+        errorHandler.logError(message, e)
     }
 
 }

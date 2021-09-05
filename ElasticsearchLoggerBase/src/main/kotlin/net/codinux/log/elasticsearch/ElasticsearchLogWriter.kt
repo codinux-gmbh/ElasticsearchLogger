@@ -67,7 +67,7 @@ open class ElasticsearchLogWriter(
                         errorHandler.showError("Could not send log records to Elasticsearch: ${response.status()} ${response.buildFailureMessage()}", null)
                     }
                 } catch (e: Exception) {
-                    errorHandler.showError("Could not send calculate next batch to send to Elasticsearch", e)
+                    errorHandler.logError("Could not send calculate next batch to send to Elasticsearch", e)
                 }
             }
 
@@ -122,7 +122,7 @@ open class ElasticsearchLogWriter(
                 recordsQueue.removeLast()
             }
         } catch (e: Exception) {
-            errorHandler.showError("Could not queue record $record to send to Elasticsearch", e)
+            errorHandler.logError("Could not queue record $record to send to Elasticsearch", e)
         }
     }
 

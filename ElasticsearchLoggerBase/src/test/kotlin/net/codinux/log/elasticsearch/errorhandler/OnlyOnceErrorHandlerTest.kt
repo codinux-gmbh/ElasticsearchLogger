@@ -21,13 +21,13 @@ class OnlyOnceErrorHandlerTest {
         val exception = ConnectException("Connection refused")
 
 
-        underTest.showError("Message 1", exception)
+        underTest.logError("Message 1", exception)
 
-        underTest.showError("Message 2", exception)
+        underTest.logError("Message 2", exception)
 
 
-        verify(wrappedErrorHandler, times(1)).showError(any(), any()) // verify that wrapped ErrorHandler gets called only once
-        verify(wrappedErrorHandler, times(1)).showError("Message 1", exception) // and with correct parameter
+        verify(wrappedErrorHandler, times(1)).logError(any(), any()) // verify that wrapped ErrorHandler gets called only once
+        verify(wrappedErrorHandler, times(1)).logError("Message 1", exception) // and with correct parameter
     }
 
     @Test
@@ -36,14 +36,14 @@ class OnlyOnceErrorHandlerTest {
         val exception2 = RuntimeException("Something else happened")
 
 
-        underTest.showError("Message 1", exception1)
+        underTest.logError("Message 1", exception1)
 
-        underTest.showError("Message 2", exception2)
+        underTest.logError("Message 2", exception2)
 
 
-        verify(wrappedErrorHandler, times(2)).showError(any(), any()) // verify that wrapped ErrorHandler gets called twice
-        verify(wrappedErrorHandler, times(1)).showError("Message 1", exception1) // and with correct parameter
-        verify(wrappedErrorHandler, times(1)).showError("Message 2", exception2) // and with correct parameter
+        verify(wrappedErrorHandler, times(2)).logError(any(), any()) // verify that wrapped ErrorHandler gets called twice
+        verify(wrappedErrorHandler, times(1)).logError("Message 1", exception1) // and with correct parameter
+        verify(wrappedErrorHandler, times(1)).logError("Message 2", exception2) // and with correct parameter
     }
 
 }

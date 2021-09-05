@@ -11,7 +11,7 @@ open class OnlyOnceErrorHandler @JvmOverloads constructor(
 
     protected open val handledErrors = CopyOnWriteArrayList<Class<out Throwable>>()
 
-    override fun showError(message: String, e: Throwable?) {
+    override fun logError(message: String, e: Throwable?) {
         if (e != null) {
             if (handledErrors.contains(e.javaClass)) {
                 return // already handled
@@ -20,7 +20,7 @@ open class OnlyOnceErrorHandler @JvmOverloads constructor(
             handledErrors.add(e.javaClass)
         }
 
-        wrappedErrorHandler.showError(message, e)
+        wrappedErrorHandler.logError(message, e)
     }
 
 }
