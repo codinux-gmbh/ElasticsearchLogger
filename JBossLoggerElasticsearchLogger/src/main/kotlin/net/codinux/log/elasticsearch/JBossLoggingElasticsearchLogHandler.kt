@@ -1,13 +1,17 @@
 package net.codinux.log.elasticsearch
 
+import net.codinux.log.elasticsearch.errorhandler.ErrorHandler
+import net.codinux.log.elasticsearch.errorhandler.JBossLoggingErrorHandler
 import kotlin.jvm.JvmOverloads
 import org.jboss.logmanager.ExtHandler
 import org.jboss.logmanager.ExtLogRecord
 import org.jboss.logmanager.ExtFormatter
 
 
-open class JBossLoggingElasticsearchLogHandler @JvmOverloads constructor(settings: LoggerSettings = PropertiesFilePropertiesProvider().extractSettings())
-    : ExtHandler() {
+open class JBossLoggingElasticsearchLogHandler @JvmOverloads constructor(
+    settings: LoggerSettings = PropertiesFilePropertiesProvider().extractSettings(),
+    errorHandler: ErrorHandler = JBossLoggingErrorHandler()
+) : ExtHandler() {
 
     protected open val elasticsearchLogHandler: ElasticsearchLogHandler
 
@@ -18,7 +22,7 @@ open class JBossLoggingElasticsearchLogHandler @JvmOverloads constructor(setting
             }
         }
 
-        elasticsearchLogHandler = ElasticsearchLogHandler(settings)
+        elasticsearchLogHandler = ElasticsearchLogHandler(settings, errorHandler)
     }
 
 
