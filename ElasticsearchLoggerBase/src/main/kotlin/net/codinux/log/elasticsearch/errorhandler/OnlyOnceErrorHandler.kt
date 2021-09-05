@@ -23,4 +23,8 @@ open class OnlyOnceErrorHandler @JvmOverloads constructor(
         wrappedErrorHandler.logError(message, e)
     }
 
+    override fun logInfo(message: String) {
+        wrappedErrorHandler.logInfo(message)
+    }
+
 }

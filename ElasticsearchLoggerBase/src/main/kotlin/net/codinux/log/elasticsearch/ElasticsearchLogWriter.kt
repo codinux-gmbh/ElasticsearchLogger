@@ -48,7 +48,7 @@ open class ElasticsearchLogWriter(
 
 
     init {
-        println("Logging to index '${settings.indexName}' on host ${settings.host}")
+        errorHandler.logInfo("Logging to index '${settings.indexName}' on host ${settings.host}")
     }
 
 

@@ -9,4 +9,6 @@ interface ErrorHandler {
 
     fun logError(message: String, e: Throwable?)
 
+    fun logInfo(message: String)
+
 }

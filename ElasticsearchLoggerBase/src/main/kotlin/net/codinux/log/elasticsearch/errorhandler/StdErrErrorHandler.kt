@@ -9,4 +9,8 @@ open class StdErrErrorHandler : ErrorHandler {
         e?.printStackTrace()
     }
 
+    override fun logInfo(message: String) {
+        println(message)
+    }
+
 }
