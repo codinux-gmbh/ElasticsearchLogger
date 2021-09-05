@@ -73,6 +73,8 @@ open class ElasticsearchLogWriter(
 
             TimeUnit.MILLISECONDS.sleep(settings.sendLogRecordsPeriodMillis)
         }
+
+        errorHandler.logInfo("sendData() thread has stopped")
     }
 
     private fun createBulkRequest(recordsToSend: List<String>): BulkRequest {
@@ -133,7 +135,7 @@ open class ElasticsearchLogWriter(
 
             workerThread.join(100)
         } catch (e: Exception) {
-            System.err.println("Could not stop ElasticsearchLogWriter")
+            errorHandler.logError("Could not stop ElasticsearchLogWriter")
         }
     }
 

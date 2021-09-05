@@ -60,6 +60,8 @@ open class ElasticsearchLogHandler @JvmOverloads constructor(
         } catch (e: Exception) {
             showError("Could not stop worker thread", e)
         }
+
+        errorHandler.logInfo("Closed ${javaClass.simpleName}")
     }
 
     protected open fun loggerConsumerThread() {
@@ -71,6 +73,8 @@ open class ElasticsearchLogHandler @JvmOverloads constructor(
         } catch (e: Exception) {
             showError("Error in consumer thread. What to do, continue or stop logging?", e)
         }
+
+        errorHandler.logInfo("loggerConsumerThread() thread has stopped")
     }
 
     protected open fun handleRecordSafely(record: LogRecord?) {
