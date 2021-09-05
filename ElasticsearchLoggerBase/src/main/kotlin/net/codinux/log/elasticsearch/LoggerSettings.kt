@@ -71,7 +71,7 @@ open class LoggerSettings(
 
         const val IncludeMdcDefaultValue = true
 
-        const val MaxLogRecordsPerBatchDefaultValue = 200
+        const val MaxLogRecordsPerBatchDefaultValue = 100
         const val MaxBufferedLogRecordsDefaultValue = 2000
         const val SendLogRecordsPeriodMillisDefaultValue = 100L
 
