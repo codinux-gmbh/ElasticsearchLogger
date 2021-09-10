@@ -81,6 +81,10 @@ open class ElasticsearchTestBase {
         dataCreator.mockIndexingSuccessResponse(esMock)
     }
 
+    protected open fun mockIndexingFailureResponse() {
+        dataCreator.mockIndexingFailureResponse(esMock)
+    }
+
     protected open fun mockElasticsearchInfoRequest() {
         dataCreator.mockElasticsearchInfoRequest(esMock)
     }

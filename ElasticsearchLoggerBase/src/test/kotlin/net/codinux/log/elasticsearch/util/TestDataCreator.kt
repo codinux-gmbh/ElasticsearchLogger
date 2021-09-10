@@ -2,14 +2,11 @@ package net.codinux.log.elasticsearch.util
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.http.HttpHeader
 import com.github.tomakehurst.wiremock.http.HttpHeaders
 import com.github.tomakehurst.wiremock.matching.EqualToPattern
-import net.codinux.log.elasticsearch.es_model.BulkResponse
-import net.codinux.log.elasticsearch.es_model.ResponseContainerItem
-import net.codinux.log.elasticsearch.es_model.ResponseItemBase
-import net.codinux.log.elasticsearch.es_model.ShardStatistics
+import net.codinux.log.elasticsearch.es_model.*
 
 
 class TestDataCreator {
@@ -43,37 +40,56 @@ class TestDataCreator {
             HttpHeader("content-type", "application/json; charset=UTF-8")
         )
 
+        const val IndexingFailedType = "es_rejected_execution_exception"
+
+        const val IndexingFailedReason = "rejected execution of org.elasticsearch.transport.TransportService\$7@227349ba on EsThreadPoolExecutor" +
+                "[bulk, queue capacity = 200, org.elasticsearch.common.util.concurrent.EsThreadPoolExecutor@4d3e4d91[Running, pool size = 4, active threads = 4, " +
+                "queued tasks = 202, completed tasks = 210040]]"
+
     }
 
     private val mapper = ObjectMapper()
 
 
     fun mockIndexingSuccessResponse(esMock: WireMockServer) {
-        esMock.stubFor(
-            WireMock.post(WireMock.urlPathEqualTo(ExceptedElasticsearchUrl))
+        mockIndexingResponse(esMock, createIndexingSuccessResponse())
+    }
+
+    fun mockIndexingFailureResponse(esMock: WireMockServer) {
+        mockIndexingResponse(esMock, createIndexingFailureResponse())
+    }
+
+    fun mockIndexingResponse(esMock: WireMockServer, body: String) {
+        esMock.stubFor(post(urlPathEqualTo(ExceptedElasticsearchUrl))
             .withHeader("content-type", EqualToPattern("application/json"))
-            .willReturn(WireMock.ok().withHeaders(ElasticsearchResponseHeaders).withBody(createIndexingSuccessResponse())))
+            .willReturn(ok().withHeaders(ElasticsearchResponseHeaders).withBody(body)))
     }
 
     fun mockElasticsearchInfoRequest(esMock: WireMockServer) {
-        esMock.stubFor(
-            WireMock.get(WireMock.urlPathEqualTo("/"))
-            .willReturn(
-                WireMock.ok()
-                    .withHeaders(ElasticsearchResponseHeaders).withBody(ElasticsearchInfoResponseBody)))
+        esMock.stubFor(get(urlPathEqualTo("/"))
+            .willReturn(ok().withHeaders(ElasticsearchResponseHeaders).withBody(ElasticsearchInfoResponseBody)))
     }
 
 
     private fun createIndexingSuccessResponse(): String {
         val response = BulkResponse(8, false, listOf(
-            ResponseContainerItem(
-                ResponseItemBase(IndexName, 201, "create", "7rI3f3sBzy23N1EWgjPP", 1, "_doc", 2, 9,
-                createShardStatistics())
-            )
+            ResponseContainerItem(ResponseItemBase(
+                IndexName, 201, "7rI3f3sBzy23N1EWgjPP", "created", 1, "_doc", 2, 9, createShardStatistics()
+            ))
         ))
 
         return mapToJson(response)
     }
+
+    private fun createIndexingFailureResponse(): String {
+        val response = BulkResponse(8, true, listOf(
+            ResponseContainerItem(ResponseItemBase(IndexName, 429, "7rI3f3sBzy23N1EWgjPP", error = createErrorCause()))
+        ))
+
+        return mapToJson(response)
+    }
+
+    private fun createErrorCause() = ErrorCause(IndexingFailedType, IndexingFailedReason)
 
     private fun createShardStatistics() = ShardStatistics(2, 1, 0)
 

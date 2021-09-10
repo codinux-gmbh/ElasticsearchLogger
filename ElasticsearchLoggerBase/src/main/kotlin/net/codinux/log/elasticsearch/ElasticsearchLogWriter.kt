@@ -9,13 +9,14 @@ import org.elasticsearch.action.index.IndexRequest
 import org.elasticsearch.common.xcontent.XContentType
 import org.elasticsearch.client.RequestOptions
 import java.io.PrintWriter
-import java.time.ZonedDateTime
-import java.time.ZoneOffset
 import org.elasticsearch.client.RestClient
 import org.apache.http.HttpHost
 import org.elasticsearch.action.bulk.BulkRequest
+import org.elasticsearch.action.bulk.BulkResponse
 import java.io.StringWriter
 import java.time.Instant
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
@@ -62,9 +63,11 @@ open class ElasticsearchLogWriter(
                     val bulkRequest = createBulkRequest(recordsToSend)
 
                     val response = restClient.bulk(bulkRequest, RequestOptions.DEFAULT)
+
                     if (response.hasFailures()) {
-                        recordsQueue.addAll(recordsQueue.size, recordsToSend) // append again at end of queue
-                        errorHandler.showError("Could not send log records to Elasticsearch: ${response.status()} ${response.buildFailureMessage()}", null)
+                        errorHandler.logError("Could not send log records to Elasticsearch: ${response.status()} ${response.buildFailureMessage()}")
+
+                        reAddFailedItemsToQueue(response, recordsToSend)
                     }
                 } catch (e: Exception) {
                     errorHandler.logError("Could not send calculate next batch to send to Elasticsearch", e)
@@ -108,6 +111,15 @@ open class ElasticsearchLogWriter(
             }
 
             return recordsToSend;
+        }
+    }
+
+    private fun reAddFailedItemsToQueue(response: BulkResponse, sentRecords: List<String>) {
+        response.items.forEachIndexed { index, item ->
+            if (item.isFailed) {
+                val failedRecord = sentRecords[index]
+                recordsQueue.add(recordsQueue.size, failedRecord)
+            }
         }
     }
 

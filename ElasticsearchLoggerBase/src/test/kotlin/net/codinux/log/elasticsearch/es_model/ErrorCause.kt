@@ -1,14 +1,17 @@
 package net.codinux.log.elasticsearch.es_model
 
+import com.fasterxml.jackson.annotation.JsonInclude
+
 
 /**
  * See https://raw.githubusercontent.com/elastic/elasticsearch-specification/main/output/schema/schema.json
  */
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 class ErrorCause @JvmOverloads constructor(
     val type: String,
     val reason: String,
-    val caused_by: ErrorCause?,
-    val shard: String?,
+    val caused_by: ErrorCause? = null,
+    val shard: String? = null,
     val stack_trace: String? = null,
     val root_cause: List<ErrorCause> = listOf(),
     val bytes_limit: Long? = null,

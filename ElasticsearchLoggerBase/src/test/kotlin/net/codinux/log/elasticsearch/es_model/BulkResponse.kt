@@ -1,9 +1,12 @@
 package net.codinux.log.elasticsearch.es_model
 
+import com.fasterxml.jackson.annotation.JsonInclude
+
 
 /**
  * See https://raw.githubusercontent.com/elastic/elasticsearch-specification/main/output/schema/schema.json
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 class BulkResponse @JvmOverloads constructor(
     val took: Long,
     val errors: Boolean,

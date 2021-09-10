@@ -1,6 +1,9 @@
 package net.codinux.log.elasticsearch.es_model
 
+import com.fasterxml.jackson.annotation.JsonInclude
 
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 class ShardFailure @JvmOverloads constructor(
     val reason: String,
     val shard: String,
