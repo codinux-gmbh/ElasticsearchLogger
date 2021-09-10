@@ -17,7 +17,7 @@ class OnlyOnceErrorHandlerTest {
 
 
     @Test
-    fun showSameErrorTwice() {
+    fun logsSameErrorOnlyOnce() {
         val exception = ConnectException("Connection refused")
 
 
