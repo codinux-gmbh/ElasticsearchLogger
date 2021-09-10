@@ -81,7 +81,7 @@ open class ElasticsearchLogWriter(
                 }
             }
 
-            TimeUnit.MILLISECONDS.sleep(settings.sendLogRecordsPeriodMillis)
+            try { TimeUnit.MILLISECONDS.sleep(settings.sendLogRecordsPeriodMillis) } catch (ignored: Exception) { }
         }
 
         errorHandler.logInfo("sendData() thread has stopped")
