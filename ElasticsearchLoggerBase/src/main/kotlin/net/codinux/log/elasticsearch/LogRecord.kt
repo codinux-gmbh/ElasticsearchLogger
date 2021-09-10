@@ -1,8 +1,6 @@
 package net.codinux.log.elasticsearch
 
 import java.time.Instant
-import java.time.ZoneOffset
-import java.time.ZonedDateTime
 
 
 open class LogRecord @JvmOverloads constructor(
@@ -24,9 +22,7 @@ open class LogRecord @JvmOverloads constructor(
 ) {
 
     override fun toString(): String {
-        val formattedTimestamp = ZonedDateTime.ofInstant(timestamp, ZoneOffset.UTC).format(ElasticsearchLogWriter.TimestampFormatter)
-
-        return "$formattedTimestamp $level $message"
+        return "$timestamp $level $message"
     }
 
 }
