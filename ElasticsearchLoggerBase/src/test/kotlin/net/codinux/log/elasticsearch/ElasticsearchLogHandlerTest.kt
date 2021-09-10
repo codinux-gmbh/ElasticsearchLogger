@@ -14,62 +14,14 @@ import java.util.concurrent.TimeUnit
 import java.util.logging.Level
 import kotlin.math.roundToInt
 
-class ElasticsearchLogHandlerTest {
-
-    companion object {
-
-        private const val Scheme = "http"
-
-        private const val Host = "localhost"
-
-        private const val Port = 12345
-
-        private const val IndexName = TestDataCreator.IndexName
-
-        private const val ExceptedElasticsearchUrl = TestDataCreator.ExceptedElasticsearchUrl
-
-        private const val Message = "Something terrible happened"
-
-        private val Timestamp = Instant.now()
-
-        private val LogLevel = Level.INFO.name
-
-        private const val LoggerClassName = "MyFancyClass"
-
-        private const val LoggerFullQualifiedName = "com.example.$LoggerClassName"
-
-        private const val ThreadName = "MainThread"
-
-        private const val HostName = "localhost"
-
-        private const val MaxLogRecordsPerBatch = 10
-
-    }
-
-
-    private val esMock = WireMockServer(Port)
-
-    private val settings = LoggerSettings(host = "$Scheme://$Host:$Port", indexName = IndexName, maxLogRecordsPerBatch = MaxLogRecordsPerBatch)
-
-    private val errorHandlerMock = mock(ErrorHandler::class.java)
-
-    private val dataCreator = TestDataCreator()
+class ElasticsearchLogHandlerTest : ElasticsearchTestBase() {
 
     private val underTest = ElasticsearchLogHandler(settings, errorHandlerMock)
 
 
-    @BeforeEach
-    fun init() {
-        esMock.start()
-
-        mockElasticsearchInfoRequest()
-    }
-
     @AfterEach
     fun tearDown() {
         underTest.close()
-
-        esMock.stop()
     }
 
 
@@ -183,10 +135,6 @@ class ElasticsearchLogHandlerTest {
         verifyCountRecordsInBatch(secondRequestBody, countRecords - MaxLogRecordsPerBatch)
     }
 
-    private fun verifyCountRecordsInBatch(requestBody: String, countRecords: Int) {
-        assertThat(countOccurrences(requestBody, "\"message\":\"$Message\"")).isEqualTo(countRecords)
-        assertThat(countOccurrences(requestBody, "\"level\":\"$LogLevel\"")).isEqualTo(countRecords)
-    }
 
     private fun sendMultipleRecords(countRecords: Int) {
         val record = LogRecord(Message, Timestamp, LogLevel, LoggerFullQualifiedName, ThreadName, HostName)
@@ -201,23 +149,10 @@ class ElasticsearchLogHandlerTest {
         waitTillAsynchronousProcessingDone()
     }
 
-    private fun countOccurrences(string: String, patternToFind: String): Int {
-        return string.windowed(patternToFind.length).count { it == patternToFind }
-    }
-
-
-    private fun mockIndexingSuccessResponse() {
-        dataCreator.mockIndexingSuccessResponse(esMock)
-    }
-
-    private fun mockElasticsearchInfoRequest() {
-        dataCreator.mockElasticsearchInfoRequest(esMock)
-    }
-
-
-    private fun waitTillAsynchronousProcessingDone() {
+    override fun waitTillAsynchronousProcessingDone() {
         underTest.flush()
-        TimeUnit.MILLISECONDS.sleep(settings.sendLogRecordsPeriodMillis * 4)
+
+        super.waitTillAsynchronousProcessingDone()
     }
 
 }
