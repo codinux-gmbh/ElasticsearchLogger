@@ -1,11 +1,16 @@
 package net.codinux.log.elasticsearch
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.http.HttpHeader
 import com.github.tomakehurst.wiremock.http.HttpHeaders
 import com.github.tomakehurst.wiremock.matching.EqualToPattern
 import net.codinux.log.elasticsearch.errorhandler.ErrorHandler
+import net.codinux.log.elasticsearch.es_model.BulkResponse
+import net.codinux.log.elasticsearch.es_model.ResponseContainerItem
+import net.codinux.log.elasticsearch.es_model.ResponseItemBase
+import net.codinux.log.elasticsearch.es_model.ShardStatistics
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -65,10 +70,6 @@ class ElasticsearchLogHandlerTest {
                 "  \"tagline\" : \"You Know, for Search\"\n" +
                 "}\n"
 
-        private const val IndexingResponse = "{\"took\":8,\"errors\":false,\"items\":[{\"index\":{\"_index\":\"$IndexName\",\"_type\":\"_doc\"," +
-                "\"_id\":\"7rI3f3sBzy23N1EWgjPP\",\"_version\":1,\"result\":\"created\",\"_shards\":{\"total\":2,\"successful\":1,\"failed\":0}," +
-                "\"_seq_no\":9,\"_primary_term\":2,\"status\":201}}]}"
-
         private val ElasticsearchResponseHeaders = HttpHeaders(
                 HttpHeader("X-elastic-product", "Elasticsearch"),
                 HttpHeader("content-type", "application/json; charset=UTF-8"))
@@ -82,6 +83,8 @@ class ElasticsearchLogHandlerTest {
     private val errorHandlerMock = mock(ErrorHandler::class.java)
 
     private val underTest = ElasticsearchLogHandler(settings, errorHandlerMock)
+
+    private val mapper = ObjectMapper()
 
 
     @BeforeEach
@@ -235,13 +238,27 @@ class ElasticsearchLogHandlerTest {
     private fun mockIndexingSuccessResponse() {
         esMock.stubFor(post(urlPathEqualTo(ExceptedElasticsearchUrl))
                 .withHeader("content-type", EqualToPattern("application/json"))
-                .willReturn(ok().withHeaders(ElasticsearchResponseHeaders).withBody(IndexingResponse)))
+                .willReturn(ok().withHeaders(ElasticsearchResponseHeaders).withBody(createIndexingSuccessResponse())))
     }
 
     private fun mockElasticsearchInfoRequest() {
         esMock.stubFor(get(urlPathEqualTo("/"))
                 .willReturn(ok().withHeaders(ElasticsearchResponseHeaders).withBody(ElasticsearchInfoResponseBody)))
     }
+
+
+    private fun createIndexingSuccessResponse(): String {
+        val response = BulkResponse(8, false, listOf(
+            ResponseContainerItem(ResponseItemBase(IndexName, 201, "create", "7rI3f3sBzy23N1EWgjPP", 1, "_doc", 2, 9,
+                createShardStatistics()))
+        ))
+
+        return mapToJson(response)
+    }
+
+    private fun mapToJson(response: BulkResponse) = mapper.writeValueAsString(response)
+
+    private fun createShardStatistics() = ShardStatistics(2, 1, 0)
 
     private fun waitTillAsynchronousProcessingDone() {
         underTest.flush()
