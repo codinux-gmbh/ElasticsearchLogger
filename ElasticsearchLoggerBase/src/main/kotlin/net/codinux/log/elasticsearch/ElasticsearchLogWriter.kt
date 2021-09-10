@@ -60,17 +60,24 @@ open class ElasticsearchLogWriter(
             if (recordsQueue.isNotEmpty()) {
                 try {
                     val recordsToSend = calculateRecordsToSend()
-                    val bulkRequest = createBulkRequest(recordsToSend)
 
-                    val response = restClient.bulk(bulkRequest, RequestOptions.DEFAULT)
+                    try {
+                        val bulkRequest = createBulkRequest(recordsToSend)
 
-                    if (response.hasFailures()) {
-                        errorHandler.logError("Could not send log records to Elasticsearch: ${response.status()} ${response.buildFailureMessage()}")
+                        val response = restClient.bulk(bulkRequest, RequestOptions.DEFAULT)
 
-                        reAddFailedItemsToQueue(response, recordsToSend)
+                        if (response.hasFailures()) {
+                            errorHandler.logError("Could not send log records to Elasticsearch: ${response.status()} ${response.buildFailureMessage()}")
+
+                            reAddFailedItemsToQueue(response, recordsToSend)
+                        }
+                    } catch (e: Exception) {
+                        errorHandler.logError("Could not send batch with ${recordsToSend.size} items to Elasticsearch", e)
+
+                        reAddSentItemsToQueue(recordsToSend)
                     }
                 } catch (e: Exception) {
-                    errorHandler.logError("Could not send calculate next batch to send to Elasticsearch", e)
+                    errorHandler.logError("Could not calculate next batch to send to Elasticsearch", e)
                 }
             }
 
@@ -123,6 +130,12 @@ open class ElasticsearchLogWriter(
         }
     }
 
+    private fun reAddSentItemsToQueue(sentRecords: List<String>) {
+        recordsQueue.addAll(recordsQueue.size, sentRecords)
+    }
+
+
+    private val isFirstRecord = AtomicBoolean(true) // TODO: remove again
 
     override fun writeRecord(record: LogRecord) {
         try {
