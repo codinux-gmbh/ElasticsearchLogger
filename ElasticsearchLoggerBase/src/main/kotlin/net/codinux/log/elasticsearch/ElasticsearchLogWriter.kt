@@ -58,26 +58,8 @@ open class ElasticsearchLogWriter(
 
         while (handleRecords.get()) {
             if (recordsQueue.isNotEmpty()) {
-                try {
-                    val recordsToSend = calculateRecordsToSend()
-
-                    try {
-                        val bulkRequest = createBulkRequest(recordsToSend)
-
-                        val response = restClient.bulk(bulkRequest, RequestOptions.DEFAULT)
-
-                        if (response.hasFailures()) {
-                            errorHandler.logError("Could not send log records to Elasticsearch: ${response.status()} ${response.buildFailureMessage()}")
-
-                            reAddFailedItemsToQueue(response, recordsToSend)
-                        }
-                    } catch (e: Exception) {
-                        errorHandler.logError("Could not send batch with ${recordsToSend.size} items to Elasticsearch", e)
-
-                        reAddSentItemsToQueue(recordsToSend)
-                    }
-                } catch (e: Exception) {
-                    errorHandler.logError("Could not calculate next batch to send to Elasticsearch", e)
+                synchronized(recordsQueue) {
+                    sendNextBatch()
                 }
             }
 
@@ -85,6 +67,30 @@ open class ElasticsearchLogWriter(
         }
 
         errorHandler.logInfo("sendData() thread has stopped")
+    }
+
+    private fun sendNextBatch() {
+        try {
+            val recordsToSend = calculateRecordsToSend()
+
+            try {
+                val bulkRequest = createBulkRequest(recordsToSend)
+
+                val response = restClient.bulk(bulkRequest, RequestOptions.DEFAULT)
+
+                if (response.hasFailures()) {
+                    errorHandler.logError("Could not send log records to Elasticsearch: ${response.status()} ${response.buildFailureMessage()}")
+
+                    reAddFailedItemsToQueue(response, recordsToSend)
+                }
+            } catch (e: Exception) {
+                errorHandler.logError("Could not send batch with ${recordsToSend.size} items to Elasticsearch", e)
+
+                reAddSentItemsToQueue(recordsToSend)
+            }
+        } catch (e: Exception) {
+            errorHandler.logError("Could not calculate next batch to send to Elasticsearch", e)
+        }
     }
 
     private fun createBulkRequest(recordsToSend: List<String>): BulkRequest {
@@ -143,10 +149,12 @@ open class ElasticsearchLogWriter(
 
             val recordJson = mapper.writeValueAsString(esRecord)
 
-            recordsQueue.add(recordJson)
+            synchronized(recordsQueue) {
+                recordsQueue.add(recordJson)
 
-            while (recordsQueue.size > settings.maxBufferedLogRecords) {
-                recordsQueue.removeLast()
+                while (recordsQueue.size > settings.maxBufferedLogRecords) {
+                    recordsQueue.removeLast()
+                }
             }
         } catch (e: Exception) {
             errorHandler.logError("Could not queue record $record to send to Elasticsearch", e)
