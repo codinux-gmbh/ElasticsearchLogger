@@ -17,7 +17,7 @@ class ElasticsearchLogWriterTest : ElasticsearchTestBase() {
 
     @Test
     fun loggingMessageFailsTwoTimes_GetsLoggedAtThirdAttempt() {
-        val record = LogRecord(Message, Timestamp, LogLevel, LoggerFullQualifiedName, ThreadName, HostName)
+        val record = createLogRecord()
 
         mockIndexingFailureResponse()
 

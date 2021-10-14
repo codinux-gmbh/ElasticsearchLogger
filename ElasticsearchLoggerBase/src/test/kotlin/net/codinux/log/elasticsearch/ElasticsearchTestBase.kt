@@ -67,6 +67,10 @@ open class ElasticsearchTestBase {
     }
 
 
+    protected open fun createLogRecord(message: String = Message, timestamp: Instant = Timestamp, logLevel: String = LogLevel): LogRecord {
+        return LogRecord(message, timestamp, logLevel, LoggerFullQualifiedName, ThreadName, HostName)
+    }
+
     protected open fun verifyCountRecordsInBatch(requestBody: String, countRecords: Int) {
         assertThat(countOccurrences(requestBody, "\"message\":\"$Message\"")).isEqualTo(countRecords)
         assertThat(countOccurrences(requestBody, "\"level\":\"$LogLevel\"")).isEqualTo(countRecords)

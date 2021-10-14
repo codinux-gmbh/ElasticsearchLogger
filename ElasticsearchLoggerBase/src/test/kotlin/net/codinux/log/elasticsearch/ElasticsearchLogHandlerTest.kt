@@ -27,7 +27,7 @@ class ElasticsearchLogHandlerTest : ElasticsearchTestBase() {
 
     @Test
     fun logInfoMessage() {
-        val record = LogRecord(Message, Timestamp, LogLevel, LoggerFullQualifiedName, ThreadName, HostName)
+        val record = createLogRecord()
 
         mockIndexingSuccessResponse()
 
@@ -85,7 +85,7 @@ class ElasticsearchLogHandlerTest : ElasticsearchTestBase() {
     @Test
     fun logOnlyLoggerName() {
         settings.includeLoggerName = true
-        val record = LogRecord(Message, Timestamp, LogLevel, LoggerFullQualifiedName, ThreadName, HostName)
+        val record = createLogRecord()
 
         mockIndexingSuccessResponse()
 
@@ -137,7 +137,7 @@ class ElasticsearchLogHandlerTest : ElasticsearchTestBase() {
 
 
     private fun sendMultipleRecords(countRecords: Int) {
-        val record = LogRecord(Message, Timestamp, LogLevel, LoggerFullQualifiedName, ThreadName, HostName)
+        val record = createLogRecord()
 
         mockIndexingSuccessResponse()
 
