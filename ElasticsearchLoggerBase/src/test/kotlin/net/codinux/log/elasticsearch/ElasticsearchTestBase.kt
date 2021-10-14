@@ -67,8 +67,10 @@ open class ElasticsearchTestBase {
     }
 
 
-    protected open fun createLogRecord(message: String = Message, timestamp: Instant = Timestamp, logLevel: String = LogLevel): LogRecord {
-        return LogRecord(message, timestamp, logLevel, LoggerFullQualifiedName, ThreadName, HostName)
+    protected open fun createLogRecord(message: String = Message, timestamp: Instant = Timestamp, logLevel: String = LogLevel,
+                                       logger: String = LoggerFullQualifiedName, threadName: String = ThreadName, hostName: String = HostName,
+                                       exception: Exception? = null, mdc: Map<String, String> = mapOf()): LogRecord {
+        return LogRecord(message, timestamp, logLevel, logger, threadName, hostName, exception, mdc)
     }
 
     protected open fun verifyCountRecordsInBatch(requestBody: String, countRecords: Int) {

@@ -141,13 +141,9 @@ open class ElasticsearchLogWriter(
     }
 
 
-    private val isFirstRecord = AtomicBoolean(true) // TODO: remove again
-
     override fun writeRecord(record: LogRecord) {
         try {
-            val esRecord = createEsRecord(record)
-
-            val recordJson = mapper.writeValueAsString(esRecord)
+            val recordJson = createEsRecordJson(record)
 
             synchronized(recordsQueue) {
                 recordsQueue.add(recordJson)
@@ -173,7 +169,13 @@ open class ElasticsearchLogWriter(
     }
 
 
-    protected open fun createEsRecord(record: LogRecord): Map<String, Any?> {
+    protected open fun createEsRecordJson(record: LogRecord): String {
+        val esRecord = mapToEsRecord(record)
+
+        return mapper.writeValueAsString(esRecord)
+    }
+
+    protected open fun mapToEsRecord(record: LogRecord): Map<String, Any> {
         val esRecord = mutableMapOf<String, Any>()
 
         esRecord[settings.messageFieldName] = record.message
@@ -188,13 +190,14 @@ open class ElasticsearchLogWriter(
         conditionallyAdd(esRecord, settings.includeThreadName, settings.threadNameFieldName, record.threadName)
         conditionallyAdd(esRecord, settings.includeHostName, settings.hostNameFieldName, record.host)
 
-        conditionallyAdd(esRecord, settings.includeStacktrace && record.exception != null, settings.stacktraceFieldName)
-                { extractStacktrace(record) }
+        conditionallyAdd(esRecord, settings.includeStacktrace && record.exception != null, settings.stacktraceFieldName) { extractStacktrace(record) }
 
         if (settings.includeMdc && record.mdc != null) {
             record.mdc?.let { mdc ->
+                val prefix = if (settings.mdcKeysPrefix.isNullOrBlank()) "" else settings.mdcKeysPrefix + "."
+
                 for ((key, value) in mdc) {
-                    esRecord.putIfAbsent(key, value)
+                    esRecord.put(prefix + key, value)
                 }
             }
         }

@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.client.CountMatchingStrategy
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import net.codinux.log.elasticsearch.util.TestDataCreator
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.atLeast
 import org.mockito.kotlin.reset
@@ -12,7 +13,34 @@ import org.mockito.kotlin.verifyNoMoreInteractions
 
 class ElasticsearchLogWriterTest : ElasticsearchTestBase() {
 
-    private val underTest = ElasticsearchLogWriter(settings, errorHandlerMock)
+    private val underTest = object : ElasticsearchLogWriter(settings, errorHandlerMock) {
+
+        fun createEsRecordJsonPublic(record: LogRecord): String {
+            return super.createEsRecordJson(record)
+        }
+
+    }
+
+
+    @Test
+    fun mdcFieldsPrefixOff() {
+        settings.mdcKeysPrefix = null
+        val record = createLogRecord(mdc = mapOf("key1" to "value 1", "other_context" to "other value"))
+
+        val result = underTest.createEsRecordJsonPublic(record)
+
+        assertThat(result).contains("\"key1\":\"value 1\",\"other_context\":\"other value\"")
+    }
+
+    @Test
+    fun mdcFieldsPrefixSet() {
+        settings.mdcKeysPrefix = "mdc"
+        val record = createLogRecord(mdc = mapOf("key1" to "value 1", "other_context" to "other value"))
+
+        val result = underTest.createEsRecordJsonPublic(record)
+
+        assertThat(result).contains("\"mdc.key1\":\"value 1\",\"mdc.other_context\":\"other value\"")
+    }
 
 
     @Test

@@ -32,6 +32,7 @@ open class LoggerSettings(
         open var stacktraceFieldName: String = StacktraceDefaultFieldName,
 
         open var includeMdc: Boolean = IncludeMdcDefaultValue,
+        open var mdcKeysPrefix: String? = MdcFieldsPrefixDefaultValue,
 
         open var maxLogRecordsPerBatch: Int = MaxLogRecordsPerBatchDefaultValue,
         open var maxBufferedLogRecords: Int = MaxBufferedLogRecordsDefaultValue,
@@ -48,6 +49,7 @@ open class LoggerSettings(
 
         const val MessageDefaultFieldName = "message"
 
+        @JvmStatic
         val TimestampDefaultFormat = TimestampFormat.FORMATTED_DATE_TIME
         const val TimestampDefaultFieldName = "@timestamp"
 
@@ -70,6 +72,8 @@ open class LoggerSettings(
         const val StacktraceDefaultFieldName = "stacktrace"
 
         const val IncludeMdcDefaultValue = true
+        @JvmStatic
+        val MdcFieldsPrefixDefaultValue: String? = null
 
         const val MaxLogRecordsPerBatchDefaultValue = 100
         const val MaxBufferedLogRecordsDefaultValue = 2000

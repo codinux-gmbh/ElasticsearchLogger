@@ -47,6 +47,7 @@ abstract class PropertyProviderBase {
                 getFieldName("stacktrace", LoggerSettings.StacktraceDefaultFieldName),
 
                 getIncludeField("mdc", LoggerSettings.IncludeMdcDefaultValue),
+                getNullableStringProperty("mdcprefix", LoggerSettings.MdcFieldsPrefixDefaultValue),
 
                 getIntProperty("maxlogrecordperbatch", LoggerSettings.MaxLogRecordsPerBatchDefaultValue),
                 getIntProperty("maxbufferedlogrecords", LoggerSettings.MaxBufferedLogRecordsDefaultValue),
@@ -61,6 +62,10 @@ abstract class PropertyProviderBase {
 
     protected open fun getFieldName(fieldName: String, defaultValue: String): String {
         return getElasticsearchProperty(fieldName + FIELD_NAME_KEY) ?: defaultValue
+    }
+
+    protected open fun getNullableStringProperty(propertyName: String, defaultValue: String?): String? {
+        return getElasticsearchProperty(propertyName) ?: defaultValue
     }
 
     protected open fun getIntProperty(propertyName: String, defaultValue: Int): Int {
