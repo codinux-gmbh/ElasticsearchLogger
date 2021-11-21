@@ -13,4 +13,4 @@ include ":ElasticsearchLoggerBase"
 
 include ":JavaUtilLoggingElasticsearchLogger"
 
-include ":JBossLoggerElasticsearchLogger"
+include ":JBossLoggingElasticsearchLogger"
