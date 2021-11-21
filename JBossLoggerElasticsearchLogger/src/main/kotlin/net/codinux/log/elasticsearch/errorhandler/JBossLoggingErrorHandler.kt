@@ -1,6 +1,7 @@
 package net.codinux.log.elasticsearch.errorhandler
 
-import org.jboss.logging.Logger
+import org.jboss.logmanager.Level
+import org.jboss.logmanager.Logger
 
 
 open class JBossLoggingErrorHandler(loggerName: String) : ErrorHandler {
@@ -14,7 +15,7 @@ open class JBossLoggingErrorHandler(loggerName: String) : ErrorHandler {
 
 
     override fun logError(message: String, e: Throwable?) {
-        log.error(message, e)
+        log.log(Level.ERROR, message, e)
     }
 
     override fun logInfo(message: String) {
