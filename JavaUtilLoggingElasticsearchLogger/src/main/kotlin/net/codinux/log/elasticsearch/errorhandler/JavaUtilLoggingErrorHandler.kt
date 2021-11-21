@@ -4,9 +4,9 @@ import java.util.logging.Level
 import java.util.logging.Logger
 
 
-open class JavaUtilLogErrorHandler(loggerName: String) : ErrorHandler {
+open class JavaUtilLoggingErrorHandler(loggerName: String) : ErrorHandler {
 
-    constructor() : this(JavaUtilLogErrorHandler::class.java)
+    constructor() : this(JavaUtilLoggingErrorHandler::class.java)
 
     constructor(loggerClass: Class<*>) : this(loggerClass.name)
 

@@ -3,7 +3,7 @@ package net.codinux.log.elasticsearch
 import java.util.logging.LogManager
 
 
-open class JavaUtilLogPropertyProvider : PropertyProviderBase() {
+open class JavaUtilLoggingPropertyProvider : PropertyProviderBase() {
 
     protected open val logManager: LogManager = LogManager.getLogManager()
 

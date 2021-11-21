@@ -47,7 +47,7 @@ allprojects {
 task jarAll {
     dependsOn = [
             "ElasticsearchLoggerBase:jar",
-            "JavaUtilLogElasticsearchLogger:jar",
+            "JavaUtilLoggingElasticsearchLogger:jar",
             "JBossLoggerElasticsearchLogger:jar"
     ]
 }
