@@ -1,0 +1,14 @@
+plugins {
+    id 'java'
+    id 'org.jetbrains.kotlin.jvm'
+}
+
+ext.artifactName = "java-util-logging-elasticsearch-logger-sample"
+
+ext.projectDescription = "A sample project for Java Util Logging based implementation of ElasticsearchLogger"
+
+
+
+dependencies {
+    api project(":JavaUtilLoggingElasticsearchLogger")
+}

@@ -14,3 +14,9 @@ include ":ElasticsearchLoggerBase"
 include ":JavaUtilLoggingElasticsearchLogger"
 
 include ":JBossLoggingElasticsearchLogger"
+
+
+include ":JavaUtilLoggingElasticsearchLoggerSample"
+
+
+project(':JavaUtilLoggingElasticsearchLoggerSample').projectDir = "$rootDir/sampleprojects/JavaUtilLoggingElasticsearchLoggerSample" as File
