@@ -8,7 +8,7 @@ import java.util.*
 open class PropertiesFilePropertiesProvider : PropertyProviderBase() {
 
     companion object {
-        const val FILE_NAME = "/log.properties"
+        const val FILE_NAME = "/logging.properties"
     }
 
 
