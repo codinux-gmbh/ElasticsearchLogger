@@ -1,0 +1,16 @@
+plugins {
+    id 'java'
+    id 'org.jetbrains.kotlin.jvm'
+}
+
+ext.artifactName = "jboss-logging-elasticsearch-logger-sample"
+
+ext.projectDescription = "A sample project for JBoss Logging based implementation of ElasticsearchLogger"
+
+
+
+dependencies {
+    api project(":JBossLoggingElasticsearchLogger")
+
+    api "org.jboss.logging:jboss-logging:3.4.2.Final"
+}
