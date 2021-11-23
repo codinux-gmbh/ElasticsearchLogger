@@ -29,8 +29,6 @@ open class JavaUtilLoggingElasticsearchLogHandler @JvmOverloads constructor(
             message = String.format(record.message, *record.parameters)
         }
 
-        record.thrown?.let { exception -> message += ": " + exception.message }
-
         return LogRecord(message, record.instant, record.level.name, record.loggerName,
                 threadName, hostName, record.thrown, null)
     }

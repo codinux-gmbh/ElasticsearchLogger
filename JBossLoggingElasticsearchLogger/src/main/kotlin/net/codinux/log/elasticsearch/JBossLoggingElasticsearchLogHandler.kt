@@ -35,8 +35,6 @@ open class JBossLoggingElasticsearchLogHandler @JvmOverloads constructor(
     protected open fun mapRecord(record: ExtLogRecord): LogRecord {
         var message = formatter.formatMessage(record)
 
-        record.thrown?.let { exception -> message += ": " + exception.message }
-
         return LogRecord(message, record.instant, record.level.name, record.loggerName,
                 record.threadName, record.hostName, record.thrown, record.mdcCopy)
     }

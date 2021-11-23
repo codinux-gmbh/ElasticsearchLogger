@@ -178,7 +178,10 @@ open class ElasticsearchLogWriter(
     protected open fun mapToEsRecord(record: LogRecord): Map<String, Any> {
         val esRecord = mutableMapOf<String, Any>()
 
-        esRecord[settings.messageFieldName] = record.message
+        var message = record.message
+        record.exception?.let { exception -> message += ": " + exception.message }
+
+        esRecord[settings.messageFieldName] = message
         esRecord[settings.timestampFieldName] = formatTimestamp(record.timestamp)
 
         conditionallyAdd(esRecord, settings.includeLogLevel, settings.logLevelFieldName, record.level)
