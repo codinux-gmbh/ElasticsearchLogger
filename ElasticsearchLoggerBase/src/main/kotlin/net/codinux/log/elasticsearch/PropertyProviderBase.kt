@@ -37,11 +37,11 @@ abstract class PropertyProviderBase {
                 getIncludeField("loggername", LoggerSettings.IncludeLoggerNameDefaultValue),
                 getFieldName("loggername", LoggerSettings.LoggerNameDefaultFieldName),
 
-                getIncludeField("hostName", LoggerSettings.IncludeHostNameDefaultValue),
-                getFieldName("hostName", LoggerSettings.HostNameDefaultFieldName),
-
                 getIncludeField("thread", LoggerSettings.IncludeThreadNameDefaultValue),
                 getFieldName("thread", LoggerSettings.ThreadNameDefaultFieldName),
+
+                getIncludeField("hostName", LoggerSettings.IncludeHostNameDefaultValue),
+                getFieldName("hostName", LoggerSettings.HostNameDefaultFieldName),
 
                 getIncludeField("stacktrace", LoggerSettings.IncludeStacktraceDefaultValue),
                 getFieldName("stacktrace", LoggerSettings.StacktraceDefaultFieldName),
