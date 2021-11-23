@@ -72,8 +72,7 @@ open class LoggerSettings(
         const val StacktraceDefaultFieldName = "stacktrace"
 
         const val IncludeMdcDefaultValue = true
-        @JvmStatic
-        val MdcFieldsPrefixDefaultValue: String? = null
+        const val MdcFieldsPrefixDefaultValue: String = ""
 
         const val MaxLogRecordsPerBatchDefaultValue = 100
         const val MaxBufferedLogRecordsDefaultValue = 2000
