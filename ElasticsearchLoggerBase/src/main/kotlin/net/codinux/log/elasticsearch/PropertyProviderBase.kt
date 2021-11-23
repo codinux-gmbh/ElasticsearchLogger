@@ -6,13 +6,13 @@ abstract class PropertyProviderBase {
     companion object {
         const val FIELD_NAME_KEY = ".name"
         const val INCLUDE_NAME_KEY = ".include"
-
-        const val MILLIS_SINCE_EPOCH_PROPERTY_VALUE = "MILLIS"
-        const val FORMATTED_DATE_TIME_PROPERTY_VALUE = "FORMATTED"
     }
 
 
     abstract fun getProperty(propertyName: String): String?
+
+
+    protected open val timestampResolutionConverter = TimestampResolutionConverter()
 
 
     open fun extractSettings(): LoggerSettings {
@@ -25,7 +25,7 @@ abstract class PropertyProviderBase {
 
                 getFieldName("message", LoggerSettings.MessageDefaultFieldName),
 
-                getTimestampFormat() ?: LoggerSettings.TimestampDefaultFormat,
+                getTimestampResolution() ?: LoggerSettings.TimestampDefaultResolution,
                 getFieldName("timestamp", LoggerSettings.TimestampDefaultFieldName),
 
                 getIncludeField("level", LoggerSettings.IncludeLogLevelDefaultValue),
@@ -80,17 +80,9 @@ abstract class PropertyProviderBase {
         return getElasticsearchProperty(propertyName)?.let { it.toBoolean() } ?: defaultValue
     }
 
-    protected open fun getTimestampFormat(): TimestampFormat? {
-        return getElasticsearchProperty("timestampformat")?.let { value ->
-            val upperCase = value.toUpperCase()
-
-            if (upperCase == MILLIS_SINCE_EPOCH_PROPERTY_VALUE) {
-                return TimestampFormat.MILLIS_SINCE_EPOCH
-            } else if (upperCase == FORMATTED_DATE_TIME_PROPERTY_VALUE) {
-                return TimestampFormat.FORMATTED_DATE_TIME
-            }
-
-            return TimestampFormat.valueOf(upperCase)
+    protected open fun getTimestampResolution(): TimestampResolution? {
+        return getElasticsearchProperty("timestampresolution")?.let { value ->
+            timestampResolutionConverter.convert(value)
         }
     }
 

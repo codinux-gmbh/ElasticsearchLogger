@@ -28,8 +28,8 @@ abstract class ConfigurableUnsynchronizedAppender(
     settings.messageFieldName = messageFieldName
   }
 
-  open fun setTimestampFormat(timestampFormatString: String) {
-    settings.timestampFormat = TimestampFormatConverter().convert(timestampFormatString)
+  open fun setTimestampResolution(timestampResolutionString: String) {
+    settings.timestampResolution = TimestampResolutionConverter().convert(timestampResolutionString)
   }
 
   open fun setTimestampFieldName(timestampFieldName: String) {

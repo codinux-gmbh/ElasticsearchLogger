@@ -31,7 +31,9 @@ open class ElasticsearchLogWriter(
 ) : LogWriter {
 
     companion object {
-        val TimestampFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSSZ")
+        val MillisTimestampFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+        val MicrosTimestampFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ")
+        val NanosTimestampFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSSZ")
     }
 
 
@@ -42,6 +44,12 @@ open class ElasticsearchLogWriter(
     protected open val mapper = ObjectMapper()
 
     protected open val handleRecords = AtomicBoolean(true)
+
+    protected open val timestampFormatter = when (settings.timestampResolution) {
+        TimestampResolution.Milliseconds -> MillisTimestampFormatter
+        TimestampResolution.Microseconds -> MicrosTimestampFormatter
+        TimestampResolution.Nanoseconds -> NanosTimestampFormatter
+    }
 
     protected open val workerThread = thread(name = "Send logs to Elasticsearch") {
         sendData()
@@ -221,12 +229,8 @@ open class ElasticsearchLogWriter(
     }
 
 
-    protected open fun formatTimestamp(timestamp: Instant): Any {
-        if (settings.timestampFormat === TimestampFormat.MILLIS_SINCE_EPOCH) {
-            return timestamp.toEpochMilli()
-        }
-
-        return ZonedDateTime.ofInstant(timestamp, ZoneOffset.UTC).format(TimestampFormatter)
+    protected open fun formatTimestamp(timestamp: Instant): String {
+        return ZonedDateTime.ofInstant(timestamp, ZoneOffset.UTC).format(timestampFormatter)
     }
 
     protected open fun extractStacktrace(record: LogRecord): String {

@@ -5,7 +5,7 @@
         <host>http://localhost:9200</host>
         <indexName>log</indexName>
         <messageFieldName>message</messageFieldName>
-        <timestampFormat>formatted</timestampFormat>
+        <timestampResolution>millis</timestampResolution>
         <timestampFieldName>@timestamp</timestampFieldName>
         <includeLogLevel>true</includeLogLevel>
         <logLevelFieldName>level</logLevelFieldName>
