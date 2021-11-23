@@ -1,0 +1,41 @@
+<configuration>
+
+    <appender name="ELASTICSEARCH" class="net.codinux.log.elasticsearch.LogbackElasticsearchLogAppender">
+        <enabled>true</enabled>
+        <host>http://localhost:9200</host>
+        <indexName>log</indexName>
+        <messageFieldName>message</messageFieldName>
+        <timestampFormat>formatted</timestampFormat>
+        <timestampFieldName>@timestamp</timestampFieldName>
+        <includeLogLevel>true</includeLogLevel>
+        <logLevelFieldName>level</logLevelFieldName>
+        <includeLogger>true</includeLogger>
+        <loggerFieldName>logger</loggerFieldName>
+        <includeLoggerName>false</includeLoggerName>
+        <loggerNameFieldName>loggerName</loggerNameFieldName>
+        <includeThreadName>true</includeThreadName>
+        <threadNameFieldName>thread</threadNameFieldName>
+        <includeHostName>true</includeHostName>
+        <hostNameFieldName>host</hostNameFieldName>
+        <includeStacktrace>true</includeStacktrace>
+        <stacktraceFieldName>stacktrace</stacktraceFieldName>
+        <includeMdc>true</includeMdc>
+        <mdcKeysPrefix></mdcKeysPrefix>
+        <maxLogRecordsPerBatch>100</maxLogRecordsPerBatch>
+        <maxBufferedLogRecords>2000</maxBufferedLogRecords>
+        <sendLogRecordsPeriodMillis>100</sendLogRecordsPeriodMillis>
+    </appender>
+
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%-4relative [%thread] %-5level %logger{35} - %msg %n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="info">
+        <appender-ref ref="ELASTICSEARCH" />
+        <appender-ref ref="STDOUT" />
+    </root>
+
+</configuration>

@@ -1,0 +1,13 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+}
+
+ext.artifactName = "logback-elasticsearch-logger-sample"
+
+ext.projectDescription = "A sample project for Logback based implementation of ElasticsearchLogger"
+
+
+
+dependencies {
+    api project(":LogbackElasticsearchLogger")
+}

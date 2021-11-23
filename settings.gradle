@@ -15,12 +15,18 @@ include ":JavaUtilLoggingElasticsearchLogger"
 
 include ":JBossLoggingElasticsearchLogger"
 
+include ":LogbackElasticsearchLogger"
+
 
 include ":JavaUtilLoggingElasticsearchLoggerSample"
 
 include ":JBossLoggingElasticsearchLoggerSample"
 
+include ":LogbackElasticsearchLoggerSample"
+
 
 project(':JavaUtilLoggingElasticsearchLoggerSample').projectDir = "$rootDir/sampleprojects/JavaUtilLoggingElasticsearchLoggerSample" as File
 
 project(':JBossLoggingElasticsearchLoggerSample').projectDir = "$rootDir/sampleprojects/JBossLoggingElasticsearchLoggerSample" as File
+
+project(':LogbackElasticsearchLoggerSample').projectDir = "$rootDir/sampleprojects/LogbackElasticsearchLoggerSample" as File
