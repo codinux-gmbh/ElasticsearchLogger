@@ -3,9 +3,9 @@ plugins {
     id 'org.jetbrains.kotlin.jvm'
 }
 
-ext.artifactName = "jboss-logger-elasticsearch-logger"
+ext.artifactName = "jboss-logging-elasticsearch-logger"
 
-ext.projectDescription = "Provides logging to Elasticsearch for JBoss Logger"
+ext.projectDescription = "Provides logging to Elasticsearch for JBoss Logging"
 
 
 
