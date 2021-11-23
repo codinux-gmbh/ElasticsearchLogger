@@ -51,3 +51,22 @@ task jarAll {
             "JBossLoggingElasticsearchLogger:jar"
     ]
 }
+
+
+task publishAll {
+    dependsOn = [
+            "ElasticsearchLoggerBase:publish",
+            "JavaUtilLoggingElasticsearchLogger:publish",
+            "JBossLoggingElasticsearchLogger:publish",
+            "LogbackElasticsearchLogger:publish"
+    ]
+}
+
+task publishAllToMavenLocal {
+    dependsOn = [
+            "ElasticsearchLoggerBase:publishToMavenLocal",
+            "JavaUtilLoggingElasticsearchLogger:publishToMavenLocal",
+            "JBossLoggingElasticsearchLogger:publishToMavenLocal",
+            "LogbackElasticsearchLogger:publishToMavenLocal"
+    ]
+}
