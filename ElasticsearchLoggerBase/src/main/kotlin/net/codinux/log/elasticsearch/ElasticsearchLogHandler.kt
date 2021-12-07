@@ -1,5 +1,7 @@
 package net.codinux.log.elasticsearch
 
+import net.codinux.log.elasticsearch.kubernetes.KubernetesInfo
+import net.codinux.log.elasticsearch.kubernetes.KubernetesInfoRetriever
 import net.codinux.log.elasticsearch.errorhandler.ErrorHandler
 import net.codinux.log.elasticsearch.errorhandler.OnlyOnceErrorHandler
 import net.codinux.log.elasticsearch.errorhandler.StdErrErrorHandler
@@ -13,8 +15,12 @@ open class ElasticsearchLogHandler @JvmOverloads constructor(
 
     protected open val logWriter: LogWriter
 
+    protected open val kubernetesInfo: KubernetesInfo?
+
 
     init {
+        kubernetesInfo = KubernetesInfoRetriever().retrieveKubernetesInfo()
+
         logWriter = createLogWriter(settings)
     }
 
@@ -25,6 +31,8 @@ open class ElasticsearchLogHandler @JvmOverloads constructor(
 
     open fun handle(record: LogRecord) {
         try {
+            record.kubernetesInfo = kubernetesInfo
+
             handleRecord(record)
         } catch (e: Exception) {
             showError("Could not add log record $record to log queue", e)

@@ -2,41 +2,44 @@ package net.codinux.log.elasticsearch
 
 
 open class LoggerSettings(
-        open var enabled: Boolean = EnabledDefaultValue,
+    open var enabled: Boolean = EnabledDefaultValue,
 
-        open var host: String = HostNotSetValue,
+    open var host: String = HostNotSetValue,
 
-        open var indexName: String = IndexNameDefaultValue,
+    open var indexName: String = IndexNameDefaultValue,
 
-        open var messageFieldName: String = MessageDefaultFieldName,
+    open var messageFieldName: String = MessageDefaultFieldName,
 
     open var timestampResolution: TimestampResolution = TimestampDefaultResolution,
     open var timestampFieldName: String = TimestampDefaultFieldName,
 
-        open var includeLogLevel: Boolean = IncludeLogLevelDefaultValue,
-        open var logLevelFieldName: String = LogLevelDefaultFieldName,
+    open var includeLogLevel: Boolean = IncludeLogLevelDefaultValue,
+    open var logLevelFieldName: String = LogLevelDefaultFieldName,
 
-        open var includeLogger: Boolean = IncludeLoggerDefaultValue,
-        open var loggerFieldName: String = LoggerDefaultFieldName,
+    open var includeLogger: Boolean = IncludeLoggerDefaultValue,
+    open var loggerFieldName: String = LoggerDefaultFieldName,
 
-        open var includeLoggerName: Boolean = IncludeLoggerNameDefaultValue,
-        open var loggerNameFieldName: String = LoggerNameDefaultFieldName,
+    open var includeLoggerName: Boolean = IncludeLoggerNameDefaultValue,
+    open var loggerNameFieldName: String = LoggerNameDefaultFieldName,
 
-        open var includeThreadName: Boolean = IncludeThreadNameDefaultValue,
-        open var threadNameFieldName: String = ThreadNameDefaultFieldName,
+    open var includeThreadName: Boolean = IncludeThreadNameDefaultValue,
+    open var threadNameFieldName: String = ThreadNameDefaultFieldName,
 
-        open var includeHostName: Boolean = IncludeHostNameDefaultValue,
-        open var hostNameFieldName: String = HostNameDefaultFieldName,
+    open var includeHostName: Boolean = IncludeHostNameDefaultValue,
+    open var hostNameFieldName: String = HostNameDefaultFieldName,
 
-        open var includeStacktrace: Boolean = IncludeStacktraceDefaultValue,
-        open var stacktraceFieldName: String = StacktraceDefaultFieldName,
+    open var includeStacktrace: Boolean = IncludeStacktraceDefaultValue,
+    open var stacktraceFieldName: String = StacktraceDefaultFieldName,
 
-        open var includeMdc: Boolean = IncludeMdcDefaultValue,
-        open var mdcKeysPrefix: String? = MdcFieldsPrefixDefaultValue,
+    open var includeMdc: Boolean = IncludeMdcDefaultValue,
+    open var mdcKeysPrefix: String? = MdcFieldsPrefixDefaultValue,
 
-        open var maxLogRecordsPerBatch: Int = MaxLogRecordsPerBatchDefaultValue,
-        open var maxBufferedLogRecords: Int = MaxBufferedLogRecordsDefaultValue,
-        open var sendLogRecordsPeriodMillis: Long = SendLogRecordsPeriodMillisDefaultValue
+    open var includeKubernetesInfo: Boolean = IncludeKubernetesInfoDefaultValue,
+    open var kubernetesKeysPrefix: String? = KubernetesFieldsPrefixDefaultValue,
+
+    open var maxLogRecordsPerBatch: Int = MaxLogRecordsPerBatchDefaultValue,
+    open var maxBufferedLogRecords: Int = MaxBufferedLogRecordsDefaultValue,
+    open var sendLogRecordsPeriodMillis: Long = SendLogRecordsPeriodMillisDefaultValue
 ) {
 
     companion object {
@@ -73,6 +76,9 @@ open class LoggerSettings(
 
         const val IncludeMdcDefaultValue = true
         const val MdcFieldsPrefixDefaultValue: String = ""
+
+        const val IncludeKubernetesInfoDefaultValue = true
+        const val KubernetesFieldsPrefixDefaultValue: String = "k8s"
 
         const val MaxLogRecordsPerBatchDefaultValue = 100
         const val MaxBufferedLogRecordsDefaultValue = 2000

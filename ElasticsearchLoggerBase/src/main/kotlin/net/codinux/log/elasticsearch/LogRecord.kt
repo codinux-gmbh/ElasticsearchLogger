@@ -1,5 +1,6 @@
 package net.codinux.log.elasticsearch
 
+import net.codinux.log.elasticsearch.kubernetes.KubernetesInfo
 import java.time.Instant
 
 
@@ -18,7 +19,9 @@ open class LogRecord @JvmOverloads constructor(
 
     open val exception: Throwable? = null,
 
-    open val mdc: Map<String, String>? = null
+    open val mdc: Map<String, String>? = null,
+
+    open var kubernetesInfo: KubernetesInfo? = null
 ) {
 
     override fun toString(): String {

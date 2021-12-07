@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import net.codinux.log.elasticsearch.errorhandler.ErrorHandler
 import net.codinux.log.elasticsearch.errorhandler.OnlyOnceErrorHandler
 import net.codinux.log.elasticsearch.errorhandler.StdErrErrorHandler
+import net.codinux.log.elasticsearch.kubernetes.KubernetesInfo
 import org.elasticsearch.client.RestHighLevelClient
 import org.elasticsearch.action.index.IndexRequest
 import org.elasticsearch.common.xcontent.XContentType
@@ -25,9 +26,9 @@ import kotlin.Exception
 import kotlin.concurrent.thread
 
 
-open class ElasticsearchLogWriter(
-        protected open val settings: LoggerSettings,
-        protected open val errorHandler: ErrorHandler = OnlyOnceErrorHandler(StdErrErrorHandler())
+open class ElasticsearchLogWriter @JvmOverloads constructor(
+    protected open val settings: LoggerSettings,
+    protected open val errorHandler: ErrorHandler = OnlyOnceErrorHandler(StdErrErrorHandler())
 ) : LogWriter {
 
     companion object {
@@ -213,7 +214,51 @@ open class ElasticsearchLogWriter(
             }
         }
 
+        if (settings.includeKubernetesInfo) {
+            record.kubernetesInfo?.let { kubernetesInfo ->
+                addKubernetesInfoToEsRecord(esRecord, kubernetesInfo)
+            }
+        }
+
         return esRecord
+    }
+
+    private fun addKubernetesInfoToEsRecord(esRecord: MutableMap<String, Any>, info: KubernetesInfo) {
+        val prefix = if (settings.kubernetesKeysPrefix.isNullOrBlank()) "" else settings.kubernetesKeysPrefix + "."
+
+        esRecord.put(prefix + "namespace", info.namespace)
+        esRecord.put(prefix + "podName", info.podName)
+        esRecord.put(prefix + "podIp", info.podIp)
+        esRecord.put(prefix + "startTime", info.startTime)
+        addIfNotNull(esRecord, prefix, "podUid", info.podUid)
+        esRecord.put(prefix + "restartCount", info.restartCount)
+        addIfNotNull(esRecord, prefix, "containerName", info.containerName)
+        addIfNotNull(esRecord, prefix, "containerId", info.containerId)
+        addIfNotNull(esRecord, prefix, "imageName", info.imageName)
+        addIfNotNull(esRecord, prefix, "imageId", info.imageId)
+        addIfNotNull(esRecord, prefix, "nodeIp", info.nodeIp)
+        addIfNotNull(esRecord, prefix, "node", info.nodeName)
+        addIfNotNull(esRecord, prefix, "clusterName", info.clusterName)
+
+        info.labels.forEach { name, value ->
+            esRecord.put(prefix + "label." + name, value)
+        }
+
+        info.annotations.forEach { name, value ->
+            esRecord.put(prefix + "annotation." + name, value)
+        }
+    }
+
+    protected open fun addIfNotNull(record: MutableMap<String, Any>, fieldNamePrefix: String, fieldName: String, value: Any?) {
+        value?.let {
+            record[fieldName] = value
+        }
+    }
+
+    protected open fun addIfNotNull(record: MutableMap<String, Any>, fieldName: String, value: Any?) {
+        value?.let {
+            record[fieldName] = value
+        }
     }
 
     protected open fun conditionallyAdd(record: MutableMap<String, Any>, include: Boolean, fieldName: String, valueSupplier: () -> Any) {
