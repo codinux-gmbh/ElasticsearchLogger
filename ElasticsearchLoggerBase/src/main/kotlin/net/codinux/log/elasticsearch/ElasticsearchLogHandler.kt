@@ -6,6 +6,7 @@ import net.codinux.log.elasticsearch.errorhandler.ErrorHandler
 import net.codinux.log.elasticsearch.errorhandler.OnlyOnceErrorHandler
 import net.codinux.log.elasticsearch.errorhandler.StdErrErrorHandler
 import java.lang.Exception
+import java.util.concurrent.CopyOnWriteArrayList
 
 
 open class ElasticsearchLogHandler @JvmOverloads constructor(
@@ -13,35 +14,63 @@ open class ElasticsearchLogHandler @JvmOverloads constructor(
         protected open val errorHandler: ErrorHandler = OnlyOnceErrorHandler(StdErrErrorHandler())
 ) {
 
-    protected open val logWriter: LogWriter
+    protected open val logWriter: LogWriter = createLogWriter(settings)
 
-    protected open val kubernetesInfo: KubernetesInfo?
+    protected open var kubernetesInfo: KubernetesInfo? = null
+
+    protected open val unhandledLogs = CopyOnWriteArrayList<LogRecord>()
+
+    protected open var handleLogs = false
 
 
     init {
-        kubernetesInfo = KubernetesInfoRetriever().retrieveKubernetesInfo()
-
-        logWriter = createLogWriter(settings)
+        if (settings.includeKubernetesInfo) {
+            retrieveKubernetesInfo()
+        } else {
+            handleLogs = true
+        }
     }
 
     protected open fun createLogWriter(settings: LoggerSettings): ElasticsearchLogWriter {
         return ElasticsearchLogWriter(settings, errorHandler)
     }
 
+    protected open fun retrieveKubernetesInfo() {
+        // do this non blocking as retrieving kubernetes info takes approximately 4 seconds -> we cannot block application startup for that long time
+        KubernetesInfoRetriever().retrieveKubernetesInfoAsync {
+            this.kubernetesInfo = it
+
+            startLogRecordProcessing()
+        }
+    }
+
+    protected open fun startLogRecordProcessing() {
+        this.handleLogs = true
+
+        unhandledLogs.forEach { handle(it) }
+
+        unhandledLogs.clear()
+    }
+
 
     open fun handle(record: LogRecord) {
         try {
-            record.kubernetesInfo = kubernetesInfo
+            if (handleLogs) {
+                record.kubernetesInfo = kubernetesInfo
 
-            handleRecord(record)
+                handleRecord(record)
+            } else {
+                unhandledLogs.add(record)
+            }
         } catch (e: Exception) {
-            showError("Could not add log record $record to log queue", e)
+            showError("Could not process log record $record", e)
         }
     }
 
     protected open fun handleRecord(record: LogRecord) {
         logWriter.writeRecord(record)
     }
+
 
     open fun flush() {
         // nothing to do anymore
