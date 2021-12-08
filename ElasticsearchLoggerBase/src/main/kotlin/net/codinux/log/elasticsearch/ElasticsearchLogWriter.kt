@@ -17,7 +17,6 @@ import org.elasticsearch.action.bulk.BulkResponse
 import java.io.StringWriter
 import java.time.Instant
 import java.time.ZoneOffset
-import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
@@ -273,7 +272,7 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
 
 
     protected open fun formatTimestamp(timestamp: Instant): String {
-        return ZonedDateTime.ofInstant(timestamp, ZoneOffset.UTC).format(timestampFormatter)
+        return timestamp.atOffset(ZoneOffset.UTC).format(timestampFormatter)
     }
 
     protected open fun extractStacktrace(record: LogRecord): String {
