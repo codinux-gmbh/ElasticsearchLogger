@@ -75,9 +75,9 @@ open class LoggerSettings(
         const val StacktraceDefaultFieldName = "stacktrace"
 
         const val IncludeMdcDefaultValue = true
-        const val MdcFieldsPrefixDefaultValue: String = ""
+        const val MdcFieldsPrefixDefaultValue: String = "mdc"
 
-        const val IncludeKubernetesInfoDefaultValue = true
+        const val IncludeKubernetesInfoDefaultValue = false
         const val KubernetesFieldsPrefixDefaultValue: String = "k8s"
 
         const val MaxLogRecordsPerBatchDefaultValue = 100
