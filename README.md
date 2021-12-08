@@ -1,41 +1,61 @@
 # Elasticsearch Logger
 
-Contains implementations for various logging frameworks to log records to Elasticsearch.
+Implements logging to Elasticsearch for various logging frameworks.
 
-## JBoss Logger 
+Base for the Quarkus Elasticsearch Logger: https://github.com/codinux-gmbh/quarkus-elasticsearch-logger
+
+## Logback
+
+### Gradle
+
+```
+implementation 'net.codinux.log:logback-elasticsearch-logger:2.0.0'
+```
 
 ### Maven
 
 ```
 <dependency>
     <groupId>net.codinux.log</groupId>
-    <artifactId>jboss-logger-elasticsearch-logger</artifactId>
-    <version>1.0.0</version>
+    <artifactId>logback-elasticsearch-logger</artifactId>
+    <version>2.0.0</version>
 </dependency>
 ```
+
+## JBoss Logging
 
 ### Gradle
 
 ```
-implementation 'net.codinux.log:jboss-logger-elasticsearch-logger:1.0.0'
+implementation 'net.codinux.log:jboss-logging-elasticsearch-logger:2.0.0'
 ```
-
-## Java Util Log
 
 ### Maven
 
 ```
 <dependency>
     <groupId>net.codinux.log</groupId>
-    <artifactId>java-util-log-elasticsearch-logger</artifactId>
-    <version>1.0.0</version>
+    <artifactId>jboss-logging-elasticsearch-logger</artifactId>
+    <version>2.0.0</version>
 </dependency>
 ```
+
+## Java Util Logging
 
 ### Gradle
 
 ```
-implementation 'net.codinux.log:java-util-log-elasticsearch-logger:1.0.0'
+implementation 'net.codinux.log:java-util-logging-elasticsearch-logger:2.0.0'
+```
+
+### Maven
+
+```
+<dependency>
+    <groupId>net.codinux.log</groupId>
+    <artifactId>java-util-logging-elasticsearch-logger</artifactId>
+    <version>2.0.0</version>
+</dependency>
 ```
 
 # License
