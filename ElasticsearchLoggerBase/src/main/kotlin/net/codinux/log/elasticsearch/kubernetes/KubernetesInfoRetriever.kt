@@ -9,6 +9,7 @@ import java.time.Instant
 
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
+import kotlin.concurrent.thread
 
 
 open class KubernetesInfoRetriever {
@@ -19,6 +20,12 @@ open class KubernetesInfoRetriever {
         private val log = LoggerFactory.getLogger(KubernetesInfoRetriever::class.java)
     }
 
+
+    open fun retrieveKubernetesInfoAsync(callback: (KubernetesInfo?) -> Unit) {
+        thread {
+            callback(retrieveKubernetesInfo())
+        }
+    }
 
     open fun retrieveKubernetesInfo(): KubernetesInfo? {
         try {
