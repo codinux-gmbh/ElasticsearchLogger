@@ -251,13 +251,7 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
 
     protected open fun addIfNotNull(record: MutableMap<String, Any>, fieldNamePrefix: String, fieldName: String, value: Any?) {
         value?.let {
-            record[fieldName] = value
-        }
-    }
-
-    protected open fun addIfNotNull(record: MutableMap<String, Any>, fieldName: String, value: Any?) {
-        value?.let {
-            record[fieldName] = value
+            record[fieldNamePrefix + fieldName] = value
         }
     }
 
