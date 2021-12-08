@@ -241,12 +241,16 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
         addIfNotNull(esRecord, prefix, "clusterName", info.clusterName)
 
         info.labels.forEach { name, value ->
-            esRecord.put(prefix + "label." + name, value)
+            esRecord.put(prefix + "label." + convertToEsFieldName(name), value)
         }
 
         info.annotations.forEach { name, value ->
-            esRecord.put(prefix + "annotation." + name, value)
+            esRecord.put(prefix + "annotation." + convertToEsFieldName(name), value)
         }
+    }
+
+    protected open fun convertToEsFieldName(name: String): String {
+        return name.replace(".", "_") // dots signify sub objects
     }
 
     protected open fun addIfNotNull(record: MutableMap<String, Any>, fieldNamePrefix: String, fieldName: String, value: Any?) {
