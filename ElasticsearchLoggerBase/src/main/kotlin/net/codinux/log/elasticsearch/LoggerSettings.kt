@@ -48,7 +48,7 @@ open class LoggerSettings(
 
         const val HostNotSetValue = "null"
 
-        const val IndexNameDefaultValue = "log"
+        const val IndexNameDefaultValue = "logs"
 
         const val MessageDefaultFieldName = "message"
 
