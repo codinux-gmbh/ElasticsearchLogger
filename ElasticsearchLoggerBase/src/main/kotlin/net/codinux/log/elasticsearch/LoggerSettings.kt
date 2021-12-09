@@ -35,7 +35,13 @@ open class LoggerSettings(
     open var mdcKeysPrefix: String? = MdcFieldsPrefixDefaultValue,
 
     open var includeKubernetesInfo: Boolean = IncludeKubernetesInfoDefaultValue,
-    open var kubernetesKeysPrefix: String? = KubernetesFieldsPrefixDefaultValue,
+    open var kubernetesFieldsPrefix: String? = KubernetesFieldsPrefixDefaultValue,
+
+    open var includeKubernetesLabels: Boolean = IncludeKubernetesLabelsDefaultValue,
+    open var kubernetesLabelsPrefix: String? = KubernetesLabelsPrefixDefaultValue,
+
+    open var includeKubernetesAnnotations: Boolean = IncludeKubernetesAnnotationsDefaultValue,
+    open var kubernetesAnnotationsPrefix: String? = KubernetesAnnotationsPrefixDefaultValue,
 
     open var maxLogRecordsPerBatch: Int = MaxLogRecordsPerBatchDefaultValue,
     open var maxBufferedLogRecords: Int = MaxBufferedLogRecordsDefaultValue,
@@ -88,6 +94,14 @@ open class LoggerSettings(
         const val IncludeKubernetesInfoDefaultValue = false
         const val IncludeKubernetesInfoDefaultValueString = "false"
         const val KubernetesFieldsPrefixDefaultValue: String = "k8s"
+
+        const val IncludeKubernetesLabelsDefaultValue = false
+        const val IncludeKubernetesLabelsDefaultValueString = "false"
+        const val KubernetesLabelsPrefixDefaultValue: String = "label"
+
+        const val IncludeKubernetesAnnotationsDefaultValue = false
+        const val IncludeKubernetesAnnotationsDefaultValueString = "false"
+        const val KubernetesAnnotationsPrefixDefaultValue: String = "annotation"
 
         const val MaxLogRecordsPerBatchDefaultValue = 100
         const val MaxBufferedLogRecordsDefaultValue = 2000

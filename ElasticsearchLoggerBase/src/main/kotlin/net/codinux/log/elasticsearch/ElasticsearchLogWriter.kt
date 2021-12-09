@@ -205,7 +205,7 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
 
         if (settings.includeMdc && record.mdc != null) {
             record.mdc?.let { mdc ->
-                val prefix = if (settings.mdcKeysPrefix.isNullOrBlank()) "" else settings.mdcKeysPrefix + "."
+                val prefix = determinePrefix(settings.mdcKeysPrefix)
 
                 for ((key, value) in mdc) {
                     esRecord.put(prefix + key, value)
@@ -223,7 +223,7 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
     }
 
     private fun addKubernetesInfoToEsRecord(esRecord: MutableMap<String, Any>, info: KubernetesInfo) {
-        val prefix = if (settings.kubernetesKeysPrefix.isNullOrBlank()) "" else settings.kubernetesKeysPrefix + "."
+        val prefix = determinePrefix(settings.kubernetesFieldsPrefix)
 
         esRecord.put(prefix + "namespace", info.namespace)
         esRecord.put(prefix + "podName", info.podName)
@@ -239,13 +239,25 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
         addIfNotNull(esRecord, prefix, "node", info.nodeName)
         addIfNotNull(esRecord, prefix, "clusterName", info.clusterName)
 
-        info.labels.forEach { name, value ->
-            esRecord.put(prefix + "label." + convertToEsFieldName(name), value)
+        if (settings.includeKubernetesLabels) {
+            val labelsPrefix = prefix + determinePrefix(settings.kubernetesLabelsPrefix)
+
+            info.labels.forEach { name, value ->
+                esRecord.put(labelsPrefix + convertToEsFieldName(name), value)
+            }
         }
 
-        info.annotations.forEach { name, value ->
-            esRecord.put(prefix + "annotation." + convertToEsFieldName(name), value)
+        if (settings.includeKubernetesAnnotations) {
+            val annotationsPrefix = prefix + determinePrefix(settings.kubernetesAnnotationsPrefix)
+
+            info.annotations.forEach { name, value ->
+                esRecord.put(annotationsPrefix + convertToEsFieldName(name), value)
+            }
         }
+    }
+
+    private fun determinePrefix(prefix: String?): String {
+        return if (prefix.isNullOrBlank()) "" else prefix + "."
     }
 
     protected open fun convertToEsFieldName(name: String): String {

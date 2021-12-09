@@ -59,6 +59,12 @@ abstract class PropertyProviderBase {
                 getIncludeField("kubernetes", LoggerSettings.IncludeKubernetesInfoDefaultValue),
                 getNullableStringProperty("kubernetesprefix", LoggerSettings.KubernetesFieldsPrefixDefaultValue),
 
+                getIncludeField("kubernetes-labels", LoggerSettings.IncludeKubernetesLabelsDefaultValue),
+                getNullableStringProperty("kuberneteslabelsprefix", LoggerSettings.KubernetesLabelsPrefixDefaultValue),
+
+                getIncludeField("kubernetes-annotations", LoggerSettings.IncludeKubernetesAnnotationsDefaultValue),
+                getNullableStringProperty("kubernetesannotationsprefix", LoggerSettings.KubernetesAnnotationsPrefixDefaultValue),
+
                 getIntProperty("maxlogrecordperbatch", LoggerSettings.MaxLogRecordsPerBatchDefaultValue),
                 getIntProperty("maxbufferedlogrecords", LoggerSettings.MaxBufferedLogRecordsDefaultValue),
                 getLongProperty("sendlogrecordsperiodmillis", LoggerSettings.SendLogRecordsPeriodMillisDefaultValue)
