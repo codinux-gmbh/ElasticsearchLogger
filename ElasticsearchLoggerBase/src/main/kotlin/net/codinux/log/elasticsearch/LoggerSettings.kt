@@ -45,6 +45,7 @@ open class LoggerSettings(
     companion object {
 
         const val EnabledDefaultValue = true
+        const val EnabledDefaultValueString = "true"
 
         const val HostNotSetValue = "null"
 
@@ -57,27 +58,35 @@ open class LoggerSettings(
         const val TimestampDefaultFieldName = "@timestamp"
 
         const val IncludeLogLevelDefaultValue = true
+        const val IncludeLogLevelDefaultValueString = "true"
         const val LogLevelDefaultFieldName = "level"
 
         const val IncludeLoggerDefaultValue = true
+        const val IncludeLoggerDefaultValueString = "true"
         const val LoggerDefaultFieldName = "logger"
 
         const val IncludeLoggerNameDefaultValue = false
+        const val IncludeLoggerNameDefaultValueString = "false"
         const val LoggerNameDefaultFieldName = "loggername"
 
         const val IncludeThreadNameDefaultValue = true
+        const val IncludeThreadNameDefaultValueString = "true"
         const val ThreadNameDefaultFieldName = "thread"
 
         const val IncludeHostNameDefaultValue = true
+        const val IncludeHostNameDefaultValueString = "true"
         const val HostNameDefaultFieldName = "host"
 
         const val IncludeStacktraceDefaultValue = true
+        const val IncludeStacktraceDefaultValueString = "true"
         const val StacktraceDefaultFieldName = "stacktrace"
 
         const val IncludeMdcDefaultValue = true
+        const val IncludeMdcDefaultValueString = "true"
         const val MdcFieldsPrefixDefaultValue: String = "mdc"
 
         const val IncludeKubernetesInfoDefaultValue = false
+        const val IncludeKubernetesInfoDefaultValueString = "false"
         const val KubernetesFieldsPrefixDefaultValue: String = "k8s"
 
         const val MaxLogRecordsPerBatchDefaultValue = 100
