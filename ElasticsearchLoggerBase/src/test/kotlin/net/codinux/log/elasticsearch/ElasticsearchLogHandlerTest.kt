@@ -60,8 +60,8 @@ class ElasticsearchLogHandlerTest : ElasticsearchTestBase() {
 
 
         esMock.verify(postRequestedFor(urlPathEqualTo(ExceptedElasticsearchUrl))
-                .withRequestBody(containing("\"$mdcKey1\":\"$mdcValue1\""))
-                .withRequestBody(containing("\"$mdcKey2\":\"$mdcValue2\"")))
+                .withRequestBody(containing("\"mdc.$mdcKey1\":\"$mdcValue1\""))
+                .withRequestBody(containing("\"mdc.$mdcKey2\":\"$mdcValue2\"")))
     }
 
     @Test
