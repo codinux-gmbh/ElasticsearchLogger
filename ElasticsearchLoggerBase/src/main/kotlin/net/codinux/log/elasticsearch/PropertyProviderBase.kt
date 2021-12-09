@@ -1,5 +1,8 @@
 package net.codinux.log.elasticsearch
 
+import net.codinux.log.elasticsearch.converter.ElasticsearchIndexNameConverter
+import net.codinux.log.elasticsearch.errorhandler.ErrorHandler
+
 
 abstract class PropertyProviderBase {
 
@@ -12,16 +15,20 @@ abstract class PropertyProviderBase {
     abstract fun getProperty(propertyName: String): String?
 
 
+    protected open val indexNameConverter = ElasticsearchIndexNameConverter()
+
     protected open val timestampResolutionConverter = TimestampResolutionConverter()
 
 
-    open fun extractSettings(): LoggerSettings {
+    open fun extractSettings(errorHandler: ErrorHandler): LoggerSettings {
+        val indexName = indexNameConverter.createIndexName(getElasticsearchPropertyOr("index", LoggerSettings.IndexNameDefaultValue), errorHandler)
+
         return LoggerSettings(
             getBooleanProperty("enable", LoggerSettings.EnabledDefaultValue),
 
                 getElasticsearchPropertyOr("host", LoggerSettings.HostNotSetValue),
 
-                getElasticsearchPropertyOr("index", LoggerSettings.IndexNameDefaultValue),
+                indexName,
 
                 getFieldName("message", LoggerSettings.MessageDefaultFieldName),
 

@@ -9,8 +9,8 @@ import org.jboss.logmanager.ExtFormatter
 
 
 open class JBossLoggingElasticsearchLogHandler @JvmOverloads constructor(
-    settings: LoggerSettings = PropertiesFilePropertiesProvider().extractSettings(),
-    errorHandler: ErrorHandler = JBossLoggingErrorHandler()
+    errorHandler: ErrorHandler = JBossLoggingErrorHandler(),
+    settings: LoggerSettings = PropertiesFilePropertiesProvider().extractSettings(errorHandler)
 ) : ExtHandler() {
 
     protected open val elasticsearchLogHandler: ElasticsearchLogHandler

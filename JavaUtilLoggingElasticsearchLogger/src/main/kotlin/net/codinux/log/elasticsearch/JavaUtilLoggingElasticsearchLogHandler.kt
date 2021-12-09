@@ -7,8 +7,8 @@ import java.util.logging.Handler
 
 
 open class JavaUtilLoggingElasticsearchLogHandler @JvmOverloads constructor(
-    settings: LoggerSettings = JavaUtilLoggingPropertyProvider().extractSettings(),
-    errorHandler: ErrorHandler = JavaUtilLoggingErrorHandler()
+    errorHandler: ErrorHandler = JavaUtilLoggingErrorHandler(),
+    settings: LoggerSettings = JavaUtilLoggingPropertyProvider().extractSettings(errorHandler)
 ) : Handler() {
 
     protected open val elasticsearchLogHandler = ElasticsearchLogHandler(settings, errorHandler)
