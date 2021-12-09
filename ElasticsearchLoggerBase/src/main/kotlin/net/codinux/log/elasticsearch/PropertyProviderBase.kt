@@ -21,7 +21,7 @@ abstract class PropertyProviderBase {
 
 
     open fun extractSettings(errorHandler: ErrorHandler): LoggerSettings {
-        val indexName = indexNameConverter.createIndexName(getElasticsearchPropertyOr("index", LoggerSettings.IndexNameDefaultValue), errorHandler)
+        val indexName = indexNameConverter.buildIndexName(getElasticsearchPropertyOr("index", LoggerSettings.IndexNameDefaultValue), errorHandler)
 
         return LoggerSettings(
             getBooleanProperty("enable", LoggerSettings.EnabledDefaultValue),
