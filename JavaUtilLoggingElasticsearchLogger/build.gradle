@@ -9,8 +9,8 @@ ext.projectDescription = "Provides logging to Elasticsearch for Java Util Loggin
 
 
 dependencies {
-//    implementation "net.codinux.log:elasticsearch-logger-base:$version"
-    api project(":ElasticsearchLoggerBase")
+    implementation "net.codinux.log:elasticsearch-logger-base:$version"
+//    api project(":ElasticsearchLoggerBase")
 
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
