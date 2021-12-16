@@ -48,32 +48,33 @@ open class ElasticsearchLogHandler @JvmOverloads constructor(
     protected open fun startLogRecordProcessing() {
         this.handleLogs = true
 
-        unhandledLogs.forEach { handle(it) }
+        unhandledLogs.forEach { handleRecord(it) } // do not call handle() as otherwise may a wrong MDC gets added to record
 
         unhandledLogs.clear()
     }
 
 
     open fun handle(record: LogRecord) {
-        if (record.mdc == null) {
-            record.mdc = MDC.getCopyOfContextMap()
+        if (record.mdc == null) { // if logging framework does not support MDC, set it here (is that a valid use case?)
+            val mdc = MDC.getCopyOfContextMap()
+            record.mdc = if (mdc.isEmpty()) null else mdc // do not set mdc to an empty map, LogWriter will not filter that
         }
 
-        try {
-            if (handleLogs) {
-                record.kubernetesInfo = kubernetesInfo
-
-                handleRecord(record)
-            } else {
-                unhandledLogs.add(record)
-            }
-        } catch (e: Exception) {
-            showError("Could not process log record $record", e)
+        if (handleLogs) {
+            handleRecord(record)
+        } else {
+            unhandledLogs.add(record)
         }
     }
 
     protected open fun handleRecord(record: LogRecord) {
-        logWriter.writeRecord(record)
+        try {
+            record.kubernetesInfo = kubernetesInfo
+
+            logWriter.writeRecord(record)
+        } catch (e: Exception) {
+            showError("Could not process log record $record", e)
+        }
     }
 
 
