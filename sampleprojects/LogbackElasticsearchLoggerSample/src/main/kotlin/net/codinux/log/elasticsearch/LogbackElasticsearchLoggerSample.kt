@@ -2,6 +2,7 @@ package net.codinux.log.elasticsearch
 
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
+import org.slf4j.MarkerFactory
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.system.exitProcess
@@ -30,6 +31,14 @@ open class LogbackElasticsearchLoggerSample {
         log.info("Info log")
 
         log.debug("Debug log - shouldn't get logged")
+
+        MDC.put("MDC test key", "MDC test value")
+        log.info("Log with MDC set")
+        MDC.clear()
+
+        log.info("Log after clearing MDC")
+
+        log.info(MarkerFactory.getMarker("ImportantMessageMarker"), "Log with Marker")
 
         TimeUnit.SECONDS.sleep(5) // ElasticsearchLogger sends records asynchronously, give it some time for that
 

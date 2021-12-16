@@ -56,6 +56,9 @@ abstract class PropertyProviderBase {
                 getIncludeField("mdc", LoggerSettings.IncludeMdcDefaultValue),
                 getNullableStringProperty("mdcprefix", LoggerSettings.MdcFieldsPrefixDefaultValue),
 
+                getIncludeField("marker", LoggerSettings.IncludeMarkerDefaultValue),
+                getFieldName("marker", LoggerSettings.MarkerDefaultFieldName),
+
                 getIncludeField("kubernetes", LoggerSettings.IncludeKubernetesInfoDefaultValue),
                 getNullableStringProperty("kubernetesprefix", LoggerSettings.KubernetesFieldsPrefixDefaultValue),
 

@@ -4,6 +4,8 @@ import org.jboss.logging.Logger
 import org.jboss.logmanager.LogManager
 import org.jboss.logmanager.MDC
 import org.jboss.logmanager.handlers.ConsoleHandler
+import org.slf4j.LoggerFactory
+import org.slf4j.MarkerFactory
 import java.util.concurrent.TimeUnit
 import java.util.logging.SimpleFormatter
 import kotlin.system.exitProcess
@@ -41,6 +43,11 @@ open class JBossLoggingElasticsearchLoggerSample {
         MDC.clear()
 
         log.info("Log after clearing MDC")
+
+        // Marker does not seem to be supported by JBoss logging, even though it's a field of ExtLogRecord with JavaDoc:
+        // "Markers are used mostly by SLF4J and Log4j."
+        val slf4jLogger = LoggerFactory.getLogger(JBossLoggingElasticsearchLoggerSample::class.java)
+        slf4jLogger.info(MarkerFactory.getMarker("ImportantMessageMarker"), "Log with Marker")
 
         TimeUnit.SECONDS.sleep(1) // ElasticsearchLogger sends records asynchronously, give it some time for that
 

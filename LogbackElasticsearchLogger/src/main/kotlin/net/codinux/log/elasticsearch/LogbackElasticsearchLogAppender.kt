@@ -48,7 +48,7 @@ open class LogbackElasticsearchLogAppender @JvmOverloads constructor(
 
     protected open fun mapRecord(event: ILoggingEvent): LogRecord {
         return LogRecord(event.formattedMessage, Instant.ofEpochMilli(event.timeStamp), event.level.levelStr, event.loggerName,
-            event.threadName, hostName, getThrowable(event), event.mdcPropertyMap)
+            event.threadName, hostName, getThrowable(event), event.mdcPropertyMap, event.marker?.name)
     }
 
     private fun getThrowable(event: ILoggingEvent): Throwable? {
