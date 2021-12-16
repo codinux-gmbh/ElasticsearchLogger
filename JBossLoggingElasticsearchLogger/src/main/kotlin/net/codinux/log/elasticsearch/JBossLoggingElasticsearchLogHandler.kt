@@ -34,9 +34,10 @@ open class JBossLoggingElasticsearchLogHandler @JvmOverloads constructor(
 
     protected open fun mapRecord(record: ExtLogRecord): LogRecord {
         val message = formatter.formatMessage(record)
+        val ndc = if (record.ndc.isNullOrBlank()) null else record.ndc
 
         return LogRecord(message, record.instant, record.level.name, record.loggerName,
-                record.threadName, record.hostName, record.thrown, record.mdcCopy, record.marker?.toString(), record.ndc)
+                record.threadName, record.hostName, record.thrown, record.mdcCopy, record.marker?.toString(), ndc)
     }
 
     override fun flush() {
