@@ -5,6 +5,7 @@ import net.codinux.log.elasticsearch.kubernetes.KubernetesInfoRetriever
 import net.codinux.log.elasticsearch.errorhandler.ErrorHandler
 import net.codinux.log.elasticsearch.errorhandler.OnlyOnceErrorHandler
 import net.codinux.log.elasticsearch.errorhandler.StdErrErrorHandler
+import org.slf4j.MDC
 import java.lang.Exception
 import java.util.concurrent.CopyOnWriteArrayList
 
@@ -54,6 +55,10 @@ open class ElasticsearchLogHandler @JvmOverloads constructor(
 
 
     open fun handle(record: LogRecord) {
+        if (record.mdc == null) {
+            record.mdc = MDC.getCopyOfContextMap()
+        }
+
         try {
             if (handleLogs) {
                 record.kubernetesInfo = kubernetesInfo

@@ -19,9 +19,9 @@ open class LogRecord @JvmOverloads constructor(
 
     open val exception: Throwable? = null,
 
-    open val mdc: Map<String, String>? = null,
+    open var mdc: Map<String, String>? = null,
 
-    open var marker: String? = null,
+    open val marker: String? = null,
 
     open val ndc: String? = null,
 

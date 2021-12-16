@@ -30,7 +30,7 @@ open class JavaUtilLoggingElasticsearchLogHandler @JvmOverloads constructor(
         }
 
         return LogRecord(message, record.instant, record.level.name, record.loggerName,
-                threadName, hostName, record.thrown, null)
+                threadName, hostName, record.thrown)
     }
 
     override fun flush() {
