@@ -45,6 +45,8 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
 
     protected open val handleRecords = AtomicBoolean(true)
 
+    protected open val isClosed = AtomicBoolean(false)
+
     protected open val timestampFormatter = when (settings.timestampResolution) {
         TimestampResolution.Milliseconds -> MillisTimestampFormatter
         TimestampResolution.Microseconds -> MicrosTimestampFormatter
@@ -61,7 +63,7 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
     }
 
 
-    private fun sendData() {
+    protected open fun sendData() {
         // TODO: may simple use a REST client and create POST oneself
 
         while (handleRecords.get()) {
@@ -77,14 +79,12 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
         errorHandler.logInfo("sendData() thread has stopped")
     }
 
-    private fun sendNextBatch() {
+    protected open fun sendNextBatch() {
         try {
             val recordsToSend = calculateRecordsToSend()
 
             try {
-                val bulkRequest = createBulkRequest(recordsToSend)
-
-                val response = restClient.bulk(bulkRequest, RequestOptions.DEFAULT)
+                val response = sendRecords(recordsToSend)
 
                 if (response.hasFailures()) {
                     errorHandler.logError("Could not send log records to Elasticsearch: ${response.status()} ${response.buildFailureMessage()}")
@@ -101,7 +101,13 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
         }
     }
 
-    private fun createBulkRequest(recordsToSend: List<String>): BulkRequest {
+    protected open fun sendRecords(recordsToSend: List<String>): BulkResponse {
+        val bulkRequest = createBulkRequest(recordsToSend)
+
+        return restClient.bulk(bulkRequest, RequestOptions.DEFAULT)
+    }
+
+    protected open fun createBulkRequest(recordsToSend: List<String>): BulkRequest {
         val bulkRequest = BulkRequest(settings.indexName)
 
         recordsToSend.forEach { recordJson ->
@@ -113,7 +119,7 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
         return bulkRequest
     }
 
-    private fun calculateRecordsToSend(): List<String> {
+    protected open fun calculateRecordsToSend(): List<String> {
         val size = recordsQueue.size
 
         if (size <= settings.maxLogRecordsPerBatch) {
@@ -131,11 +137,11 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
                 recordsQueue.removeAt(fromIndex) // do not call removeAll() as if other records have the same JSON string than all matching strings get removed
             }
 
-            return recordsToSend;
+            return recordsToSend
         }
     }
 
-    private fun reAddFailedItemsToQueue(response: BulkResponse, sentRecords: List<String>) {
+    protected open fun reAddFailedItemsToQueue(response: BulkResponse, sentRecords: List<String>) {
         response.items.forEachIndexed { index, item ->
             if (item.isFailed) {
                 val failedRecord = sentRecords[index]
@@ -144,7 +150,7 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
         }
     }
 
-    private fun reAddSentItemsToQueue(sentRecords: List<String>) {
+    protected open fun reAddSentItemsToQueue(sentRecords: List<String>) {
         recordsQueue.addAll(recordsQueue.size, sentRecords)
     }
 
@@ -152,6 +158,11 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
     override fun writeRecord(record: LogRecord) {
         try {
             val recordJson = createEsRecordJson(record)
+
+            if (isClosed.get()) { // don't know if that ever will be the case: if close has been called, send all records immediately, don't hesitate anymore
+                sendRecords(listOf(recordJson))
+                return
+            }
 
             synchronized(recordsQueue) {
                 recordsQueue.add(recordJson)
@@ -168,7 +179,13 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
 
     override fun close() {
         try {
+            isClosed.set(true)
             handleRecords.set(false)
+
+            val records = ArrayList(recordsQueue)
+            recordsQueue.clear()
+
+            sendRecords(records) // send all records immediately, don't hesitate anymore
 
             workerThread.join(100)
         } catch (e: Exception) {
