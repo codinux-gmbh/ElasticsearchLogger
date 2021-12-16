@@ -214,6 +214,7 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
         }
 
         conditionallyAdd(esRecord, settings.includeMarker && record.marker != null, settings.markerFieldName, record.marker ?: "")
+        conditionallyAdd(esRecord, settings.includeNdc && record.ndc != null, settings.ndcFieldName, record.ndc ?: "")
 
         if (settings.includeKubernetesInfo) {
             record.kubernetesInfo?.let { kubernetesInfo ->

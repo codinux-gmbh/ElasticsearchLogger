@@ -37,6 +37,9 @@ open class LoggerSettings(
     open var includeMarker: Boolean = IncludeMarkerDefaultValue,
     open var markerFieldName: String = MarkerDefaultFieldName,
 
+    open var includeNdc: Boolean = IncludeNdcDefaultValue,
+    open var ndcFieldName: String = NdcDefaultFieldName,
+
     open var includeKubernetesInfo: Boolean = IncludeKubernetesInfoDefaultValue,
     open var kubernetesFieldsPrefix: String? = KubernetesFieldsPrefixDefaultValue,
 
@@ -97,6 +100,10 @@ open class LoggerSettings(
         const val IncludeMarkerDefaultValue = false
         const val IncludeMarkerDefaultValueString = "false"
         const val MarkerDefaultFieldName: String = "marker"
+
+        const val IncludeNdcDefaultValue = false
+        const val IncludeNdcDefaultValueString = "false"
+        const val NdcDefaultFieldName: String = "ndc"
 
         const val IncludeKubernetesInfoDefaultValue = false
         const val IncludeKubernetesInfoDefaultValueString = "false"

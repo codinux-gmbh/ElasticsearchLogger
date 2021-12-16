@@ -23,6 +23,8 @@ open class LogRecord @JvmOverloads constructor(
 
     open var marker: String? = null,
 
+    open val ndc: String? = null,
+
     open var kubernetesInfo: KubernetesInfo? = null
 ) {
 

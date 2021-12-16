@@ -36,7 +36,7 @@ open class JBossLoggingElasticsearchLogHandler @JvmOverloads constructor(
         val message = formatter.formatMessage(record)
 
         return LogRecord(message, record.instant, record.level.name, record.loggerName,
-                record.threadName, record.hostName, record.thrown, record.mdcCopy, record.marker?.toString())
+                record.threadName, record.hostName, record.thrown, record.mdcCopy, record.marker?.toString(), record.ndc)
     }
 
     override fun flush() {

@@ -1,6 +1,7 @@
 package net.codinux.log.elasticsearch
 
 import org.jboss.logging.Logger
+import org.jboss.logging.NDC
 import org.jboss.logmanager.LogManager
 import org.jboss.logmanager.MDC
 import org.jboss.logmanager.handlers.ConsoleHandler
@@ -43,6 +44,13 @@ open class JBossLoggingElasticsearchLoggerSample {
         MDC.clear()
 
         log.info("Log after clearing MDC")
+
+        NDC.push("NDC 1")
+        NDC.push("NDC 2")
+
+        log.info("Log with NDC")
+
+        NDC.clear()
 
         // Marker does not seem to be supported by JBoss logging, even though it's a field of ExtLogRecord with JavaDoc:
         // "Markers are used mostly by SLF4J and Log4j."
