@@ -26,7 +26,7 @@ open class ElasticsearchIndexNameConverter @JvmOverloads constructor(
     val UpperCaseRegex = Regex("[A-Z]")
 
     @JvmStatic
-    val DatePatternRegex = Regex("%date\\{(.+)}")
+    val DatePatternRegex = Regex("%date\\{([0-9A-Za-z-_.:,'+]+)}")
 
     init {
       val invalidCharacters = Strings.INVALID_FILENAME_CHARS.toMutableSet()
