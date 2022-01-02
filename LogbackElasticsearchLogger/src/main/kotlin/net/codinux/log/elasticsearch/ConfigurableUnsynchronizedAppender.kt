@@ -21,7 +21,7 @@ abstract class ConfigurableUnsynchronizedAppender(
   }
 
   open fun setIndexName(indexName: String) {
-    settings.indexName = indexName
+    settings.indexNamePattern = indexName
   }
 
   open fun setMessageFieldName(messageFieldName: String) {

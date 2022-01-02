@@ -47,7 +47,7 @@ open class ElasticsearchTestBase {
 
     protected val esMock = WireMockServer(Port)
 
-    protected val settings = LoggerSettings(host = "$Scheme://$Host:$Port", indexName = IndexName, maxLogRecordsPerBatch = MaxLogRecordsPerBatch)
+    protected val settings = LoggerSettings(host = "$Scheme://$Host:$Port", indexNamePattern = IndexName, maxLogRecordsPerBatch = MaxLogRecordsPerBatch)
 
     protected val errorHandlerMock = mock(ErrorHandler::class.java)
 

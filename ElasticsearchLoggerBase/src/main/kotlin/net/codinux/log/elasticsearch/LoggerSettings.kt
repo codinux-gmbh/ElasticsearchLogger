@@ -6,7 +6,8 @@ open class LoggerSettings(
 
     open var host: String = HostNotSetValue,
 
-    open var indexName: String = IndexNameDefaultValue,
+    open var indexNamePattern: String = IndexNameDefaultValue,
+    open var patternsInIndexName: List<MatchResult> = listOf(),
 
     open var messageFieldName: String = MessageDefaultFieldName,
 

@@ -29,12 +29,13 @@ internal class ElasticsearchIndexNameConverterTest {
 
   private fun assertValidDateTimePatternAtEnd(dateTimePattern: String) {
     // given
+    val indexNamePattern = "logs-%date{$dateTimePattern}"
     val expectedDateString = DateTimeFormatter.ofPattern(dateTimePattern).format(Instant.now().atOffset(ZoneOffset.UTC))
     val errorHandlerMock = mock(ErrorHandler::class.java)
 
 
     // when
-    val result = underTest.buildIndexName("logs-%date{$dateTimePattern}", errorHandlerMock)
+    val result = resolvePatterns(indexNamePattern, errorHandlerMock)
 
 
     // then
@@ -56,12 +57,13 @@ internal class ElasticsearchIndexNameConverterTest {
 
   private fun assertValidDateTimePatternAtStart(dateTimePattern: String) {
     // given
+    val indexNamePattern = "%date{$dateTimePattern}-logs"
     val expectedDateString = DateTimeFormatter.ofPattern(dateTimePattern).format(Instant.now().atOffset(ZoneOffset.UTC))
     val errorHandlerMock = mock(ErrorHandler::class.java)
 
 
     // when
-    val result = underTest.buildIndexName("%date{$dateTimePattern}-logs", errorHandlerMock)
+    val result = resolvePatterns(indexNamePattern, errorHandlerMock)
 
 
     // then
@@ -83,16 +85,36 @@ internal class ElasticsearchIndexNameConverterTest {
 
   private fun assertValidDateTimePatternInString(dateTimePattern: String) {
     // given
+    val indexNamePattern = "logs-%date{$dateTimePattern}-index"
     val expectedDateString = DateTimeFormatter.ofPattern(dateTimePattern).format(Instant.now().atOffset(ZoneOffset.UTC))
     val errorHandlerMock = mock(ErrorHandler::class.java)
 
 
     // when
-    val result = underTest.buildIndexName("logs-%date{$dateTimePattern}-index", errorHandlerMock)
+    val result = resolvePatterns(indexNamePattern, errorHandlerMock)
 
 
     // then
     assertThat(result).isEqualTo("logs-" + expectedDateString + "-index")
+
+    assertNoErrorOccurred(errorHandlerMock)
+  }
+
+  @Test
+  fun multipleDateTimePatternInString() {
+    // given
+    val indexNamePattern = "logs-%date{yyyy-ww}-%date{dd_HH-mm-ss}"
+    val expectedIndexName = indexNamePattern.replace("%date{yyyy-ww}", DateTimeFormatter.ofPattern("yyyy-ww").format(Instant.now().atOffset(ZoneOffset.UTC)))
+                                            .replace("%date{dd_HH-mm-ss}", DateTimeFormatter.ofPattern("dd_HH-mm-ss").format(Instant.now().atOffset(ZoneOffset.UTC)))
+    val errorHandlerMock = mock(ErrorHandler::class.java)
+
+
+    // when
+    val result = resolvePatterns(indexNamePattern, errorHandlerMock)
+
+
+    // then
+    assertThat(result).isEqualTo(expectedIndexName)
 
     assertNoErrorOccurred(errorHandlerMock)
   }
@@ -107,13 +129,48 @@ internal class ElasticsearchIndexNameConverterTest {
 
 
     // when
-    val result = underTest.buildIndexName(indexNamePattern, errorHandlerMock)
+    val result = resolvePatterns(indexNamePattern, errorHandlerMock)
 
 
     // then
     assertThat(result).isEqualTo(indexNamePattern) // nothing has been replaced
 
     verify(errorHandlerMock, times(1)).logError(anyString(), any(Exception::class.java))
+  }
+
+
+  @Test
+  fun validDateTimePatternDoesNotGetReplaced() {
+    // given
+    val indexNamePattern = "logs-%date{yyyy-dd_HH-mm-ss}"
+    val errorHandlerMock = mock(ErrorHandler::class.java)
+
+
+    // when
+    val result = underTest.buildIndexName(indexNamePattern, errorHandlerMock) // checks if masking date time patterns works
+
+
+    // then
+    assertThat(result).isEqualTo(indexNamePattern) // nothing may gets replaced then
+
+    verify(errorHandlerMock, never()).logError(anyString(), any(Exception::class.java))
+  }
+
+  @Test
+  fun validDateTimePatternDoesNotGetReplaced_TwoDateTimePattern() {
+    // given
+    val indexNamePattern = "logs-%date{yyyy-ww}-%date{dd_HH-mm-ss}"
+    val errorHandlerMock = mock(ErrorHandler::class.java)
+
+
+    // when
+    val result = underTest.buildIndexName(indexNamePattern, errorHandlerMock) // checks if masking date time patterns works
+
+
+    // then
+    assertThat(result).isEqualTo(indexNamePattern) // nothing may gets replaced then
+
+    verify(errorHandlerMock, never()).logError(anyString(), any(Exception::class.java))
   }
 
 
@@ -214,6 +271,10 @@ internal class ElasticsearchIndexNameConverterTest {
     verify(errorHandlerMock, times(1)).logInfo(anyString())
   }
 
+
+  private fun resolvePatterns(indexNamePattern: String, errorHandlerMock: ErrorHandler): String {
+    return underTest.resolvePatterns(indexNamePattern, underTest.getIncludedPatterns(indexNamePattern), errorHandlerMock)
+  }
 
   private fun assertNoErrorOccurred(errorHandlerMock: ErrorHandler) {
     verify(errorHandlerMock, never()).logError(anyString())

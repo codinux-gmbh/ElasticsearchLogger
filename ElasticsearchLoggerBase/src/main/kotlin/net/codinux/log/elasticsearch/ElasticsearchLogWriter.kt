@@ -1,6 +1,7 @@
 package net.codinux.log.elasticsearch
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import net.codinux.log.elasticsearch.converter.ElasticsearchIndexNameConverter
 import net.codinux.log.elasticsearch.errorhandler.ErrorHandler
 import net.codinux.log.elasticsearch.errorhandler.OnlyOnceErrorHandler
 import net.codinux.log.elasticsearch.errorhandler.StdErrErrorHandler
@@ -39,6 +40,8 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
 
     protected open val recordsQueue = CopyOnWriteArrayList<String>()
 
+    protected open val indexNameConverter = ElasticsearchIndexNameConverter()
+
     protected open val restClient: RestHighLevelClient = RestHighLevelClient(RestClient.builder(HttpHost.create(settings.host)))
 
     protected open val mapper = ObjectMapper()
@@ -59,7 +62,7 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
 
 
     init {
-        errorHandler.logInfo("Logging to index '${settings.indexName}' on host ${settings.host}")
+        errorHandler.logInfo("Logging to index '${settings.indexNamePattern}' on host ${settings.host}")
     }
 
 
@@ -108,15 +111,20 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
     }
 
     protected open fun createBulkRequest(recordsToSend: List<String>): BulkRequest {
-        val bulkRequest = BulkRequest(settings.indexName)
+        val indexName = getIndexName(settings)
+        val bulkRequest = BulkRequest(indexName)
 
         recordsToSend.forEach { recordJson ->
-            val request = IndexRequest(settings.indexName)
+            val request = IndexRequest(indexName)
             request.source(recordJson, XContentType.JSON)
             bulkRequest.add(request)
         }
 
         return bulkRequest
+    }
+
+    protected open fun getIndexName(settings: LoggerSettings): String {
+        return indexNameConverter.resolvePatterns(settings.indexNamePattern, settings.patternsInIndexName, errorHandler)
     }
 
     protected open fun calculateRecordsToSend(): List<String> {

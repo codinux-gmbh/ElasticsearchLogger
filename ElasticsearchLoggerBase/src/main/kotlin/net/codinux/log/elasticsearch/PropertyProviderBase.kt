@@ -21,60 +21,62 @@ abstract class PropertyProviderBase {
 
 
     open fun extractSettings(errorHandler: ErrorHandler): LoggerSettings {
-        val indexName = indexNameConverter.buildIndexName(getElasticsearchPropertyOr("index", LoggerSettings.IndexNameDefaultValue), errorHandler)
+      val indexNamePattern = indexNameConverter.buildIndexName(getElasticsearchPropertyOr("index", LoggerSettings.IndexNameDefaultValue), errorHandler)
+      val patterns = indexNameConverter.getIncludedPatterns(indexNamePattern)
 
-        return LoggerSettings(
+      return LoggerSettings(
             getBooleanProperty("enable", LoggerSettings.EnabledDefaultValue),
 
-                getElasticsearchPropertyOr("host", LoggerSettings.HostNotSetValue),
+            getElasticsearchPropertyOr("host", LoggerSettings.HostNotSetValue),
 
-                indexName,
+            indexNamePattern,
+            patterns,
 
-                getFieldName("message", LoggerSettings.MessageDefaultFieldName),
+            getFieldName("message", LoggerSettings.MessageDefaultFieldName),
 
-                getTimestampResolution() ?: LoggerSettings.TimestampDefaultResolution,
-                getFieldName("timestamp", LoggerSettings.TimestampDefaultFieldName),
+            getTimestampResolution() ?: LoggerSettings.TimestampDefaultResolution,
+            getFieldName("timestamp", LoggerSettings.TimestampDefaultFieldName),
 
-                getIncludeField("level", LoggerSettings.IncludeLogLevelDefaultValue),
-                getFieldName("level", LoggerSettings.LogLevelDefaultFieldName),
+            getIncludeField("level", LoggerSettings.IncludeLogLevelDefaultValue),
+            getFieldName("level", LoggerSettings.LogLevelDefaultFieldName),
 
-                getIncludeField("logger", LoggerSettings.IncludeLoggerDefaultValue),
-                getFieldName("logger", LoggerSettings.LoggerDefaultFieldName),
+            getIncludeField("logger", LoggerSettings.IncludeLoggerDefaultValue),
+            getFieldName("logger", LoggerSettings.LoggerDefaultFieldName),
 
-                getIncludeField("loggername", LoggerSettings.IncludeLoggerNameDefaultValue),
-                getFieldName("loggername", LoggerSettings.LoggerNameDefaultFieldName),
+            getIncludeField("loggername", LoggerSettings.IncludeLoggerNameDefaultValue),
+            getFieldName("loggername", LoggerSettings.LoggerNameDefaultFieldName),
 
-                getIncludeField("thread", LoggerSettings.IncludeThreadNameDefaultValue),
-                getFieldName("thread", LoggerSettings.ThreadNameDefaultFieldName),
+            getIncludeField("thread", LoggerSettings.IncludeThreadNameDefaultValue),
+            getFieldName("thread", LoggerSettings.ThreadNameDefaultFieldName),
 
-                getIncludeField("hostName", LoggerSettings.IncludeHostNameDefaultValue),
-                getFieldName("hostName", LoggerSettings.HostNameDefaultFieldName),
+            getIncludeField("hostName", LoggerSettings.IncludeHostNameDefaultValue),
+            getFieldName("hostName", LoggerSettings.HostNameDefaultFieldName),
 
-                getIncludeField("stacktrace", LoggerSettings.IncludeStacktraceDefaultValue),
-                getFieldName("stacktrace", LoggerSettings.StacktraceDefaultFieldName),
+            getIncludeField("stacktrace", LoggerSettings.IncludeStacktraceDefaultValue),
+            getFieldName("stacktrace", LoggerSettings.StacktraceDefaultFieldName),
 
-                getIncludeField("mdc", LoggerSettings.IncludeMdcDefaultValue),
-                getNullableStringProperty("mdcprefix", LoggerSettings.MdcFieldsPrefixDefaultValue),
+            getIncludeField("mdc", LoggerSettings.IncludeMdcDefaultValue),
+            getNullableStringProperty("mdcprefix", LoggerSettings.MdcFieldsPrefixDefaultValue),
 
-                getIncludeField("marker", LoggerSettings.IncludeMarkerDefaultValue),
-                getFieldName("marker", LoggerSettings.MarkerDefaultFieldName),
+            getIncludeField("marker", LoggerSettings.IncludeMarkerDefaultValue),
+            getFieldName("marker", LoggerSettings.MarkerDefaultFieldName),
 
-                getIncludeField("ndc", LoggerSettings.IncludeNdcDefaultValue),
-                getFieldName("ndc", LoggerSettings.NdcDefaultFieldName),
+            getIncludeField("ndc", LoggerSettings.IncludeNdcDefaultValue),
+            getFieldName("ndc", LoggerSettings.NdcDefaultFieldName),
 
-                getIncludeField("kubernetes", LoggerSettings.IncludeKubernetesInfoDefaultValue),
-                getNullableStringProperty("kubernetesprefix", LoggerSettings.KubernetesFieldsPrefixDefaultValue),
+            getIncludeField("kubernetes", LoggerSettings.IncludeKubernetesInfoDefaultValue),
+            getNullableStringProperty("kubernetesprefix", LoggerSettings.KubernetesFieldsPrefixDefaultValue),
 
-                getIncludeField("kubernetes-labels", LoggerSettings.IncludeKubernetesLabelsDefaultValue),
-                getNullableStringProperty("kuberneteslabelsprefix", LoggerSettings.KubernetesLabelsPrefixDefaultValue),
+            getIncludeField("kubernetes-labels", LoggerSettings.IncludeKubernetesLabelsDefaultValue),
+            getNullableStringProperty("kuberneteslabelsprefix", LoggerSettings.KubernetesLabelsPrefixDefaultValue),
 
-                getIncludeField("kubernetes-annotations", LoggerSettings.IncludeKubernetesAnnotationsDefaultValue),
-                getNullableStringProperty("kubernetesannotationsprefix", LoggerSettings.KubernetesAnnotationsPrefixDefaultValue),
+            getIncludeField("kubernetes-annotations", LoggerSettings.IncludeKubernetesAnnotationsDefaultValue),
+            getNullableStringProperty("kubernetesannotationsprefix", LoggerSettings.KubernetesAnnotationsPrefixDefaultValue),
 
-                getIntProperty("maxlogrecordperbatch", LoggerSettings.MaxLogRecordsPerBatchDefaultValue),
-                getIntProperty("maxbufferedlogrecords", LoggerSettings.MaxBufferedLogRecordsDefaultValue),
-                getLongProperty("sendlogrecordsperiodmillis", LoggerSettings.SendLogRecordsPeriodMillisDefaultValue)
-        )
+            getIntProperty("maxlogrecordperbatch", LoggerSettings.MaxLogRecordsPerBatchDefaultValue),
+            getIntProperty("maxbufferedlogrecords", LoggerSettings.MaxBufferedLogRecordsDefaultValue),
+            getLongProperty("sendlogrecordsperiodmillis", LoggerSettings.SendLogRecordsPeriodMillisDefaultValue)
+      )
     }
 
 

@@ -28,6 +28,8 @@ open class ElasticsearchIndexNameConverter @JvmOverloads constructor(
     @JvmStatic
     val DatePatternRegex = Regex("%date\\{([0-9A-Za-z-_.:,'+]+)}")
 
+    const val PatternsMaskString = "hijklmnopqrstuvwxyz-hijklmnopqrstuvwxyz-hijklmnopqrstuvwxyz-hijklmnopqrstuvwxyz"
+
     init {
       val invalidCharacters = Strings.INVALID_FILENAME_CHARS.toMutableSet()
       invalidCharacters.add(':')
@@ -42,9 +44,12 @@ open class ElasticsearchIndexNameConverter @JvmOverloads constructor(
    * Removes invalid characters from [indexNamePattern] and resolves patterns like %date{yyyy-MM-dd} to a date time.
    */
   open fun buildIndexName(indexNamePattern: String, errorHandler: ErrorHandler): String {
-    val indexName = resolvePatterns(indexNamePattern, errorHandler)
+    val patterns = getIncludedPatterns(indexNamePattern)
+    var indexName = maskPatterns(indexNamePattern, patterns)
 
-    return removeInvalidCharacters(indexName, errorHandler)
+    indexName = removeInvalidCharacters(indexName, errorHandler)
+
+    return unmaskPatterns(indexName, patterns)
   }
 
 
@@ -57,7 +62,7 @@ open class ElasticsearchIndexNameConverter @JvmOverloads constructor(
 
     if (validIndexName == "." || validIndexName == "..") {
       val replacement = if (invalidCharactersReplacement.length == 1 && InvalidIndexNameStartCharacters.contains(invalidCharactersReplacement[0])) "logs"
-      else invalidCharactersReplacement
+                        else invalidCharactersReplacement
       errorHandler.logError("The index name may not be '.' or '..'. Replacing it with '$replacement'.")
       validIndexName = validIndexName.replace(validIndexName, replacement)
     }
@@ -86,11 +91,12 @@ open class ElasticsearchIndexNameConverter @JvmOverloads constructor(
     return validIndexName
   }
 
-  protected open fun resolvePatterns(indexNamePattern: String, errorHandler: ErrorHandler): String {
+
+  open fun resolvePatterns(indexNamePattern: String, patternsInIndexName: List<MatchResult>, errorHandler: ErrorHandler): String {
 
     var resolvedIndexName = indexNamePattern
 
-    DatePatternRegex.findAll(resolvedIndexName).forEach { match ->
+    patternsInIndexName.forEach { match ->
       if (match.groupValues.size > 1) { // should always be the case, as matched the pattern, just to be on the safe side
         val datePattern = match.groupValues[1]
         try {
@@ -103,6 +109,34 @@ open class ElasticsearchIndexNameConverter @JvmOverloads constructor(
     }
 
     return resolvedIndexName
+  }
+
+  protected open fun maskPatterns(indexNamePattern: String, patterns: List<MatchResult>): String {
+    var maskedIndexNamePattern = indexNamePattern
+
+    patterns.forEachIndexed { matchResultIndex, matchResult ->
+      matchResult.groupValues.forEachIndexed { patternIndex, pattern ->
+        maskedIndexNamePattern = maskedIndexNamePattern.replaceFirst(pattern, PatternsMaskString + "_" + matchResultIndex + "_" + patternIndex)
+      }
+    }
+
+    return maskedIndexNamePattern
+  }
+
+  protected open fun unmaskPatterns(indexNamePattern: String, patterns: List<MatchResult>): String {
+    var unmaskedIndexNamePattern = indexNamePattern
+
+    patterns.forEachIndexed { matchResultIndex, matchResult ->
+      matchResult.groupValues.forEachIndexed { patternIndex, pattern ->
+        unmaskedIndexNamePattern = unmaskedIndexNamePattern.replaceFirst(PatternsMaskString + "_" + matchResultIndex + "_" + patternIndex, pattern)
+      }
+    }
+
+    return unmaskedIndexNamePattern
+  }
+
+  open fun getIncludedPatterns(indexNamePattern: String): List<MatchResult> {
+    return DatePatternRegex.findAll(indexNamePattern).toList()
   }
 
 }
