@@ -88,18 +88,21 @@ open class ElasticsearchIndexNameConverter @JvmOverloads constructor(
 
   protected open fun resolvePatterns(indexNamePattern: String, errorHandler: ErrorHandler): String {
 
-    DatePatternRegex.find(indexNamePattern)?.let { match ->
+    var resolvedIndexName = indexNamePattern
+
+    DatePatternRegex.findAll(resolvedIndexName).forEach { match ->
       if (match.groupValues.size > 1) { // should always be the case, as matched the pattern, just to be on the safe side
         val datePattern = match.groupValues[1]
         try {
           val formatter = DateTimeFormatter.ofPattern(datePattern)
-          return indexNamePattern.replace(match.value, formatter.format(Instant.now().atOffset(ZoneOffset.UTC)))
+          resolvedIndexName = resolvedIndexName.replace(match.value, formatter.format(Instant.now().atOffset(ZoneOffset.UTC)))
         } catch (e: Exception) {
           errorHandler.logError("Could not convert date pattern '$datePattern' from index name '$indexNamePattern' with java.time.format.DateTimeFormatter", e)
         }
       }
     }
-    return indexNamePattern
+
+    return resolvedIndexName
   }
 
 }
