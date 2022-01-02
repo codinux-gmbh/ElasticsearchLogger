@@ -57,7 +57,7 @@ open class ElasticsearchLogHandler @JvmOverloads constructor(
     open fun handle(record: LogRecord) {
         if (record.mdc == null) { // if logging framework does not support MDC, set it here (is that a valid use case?)
             val mdc = MDC.getCopyOfContextMap()
-            record.mdc = if (mdc.isEmpty()) null else mdc // do not set mdc to an empty map, LogWriter will not filter that
+            record.mdc = if (mdc.isNullOrEmpty()) null else mdc // do not set mdc to an empty map, LogWriter will not filter that
         }
 
         if (handleLogs) {
