@@ -9,7 +9,7 @@ Base for the Quarkus Elasticsearch Logger: https://github.com/codinux-gmbh/quark
 ### Gradle
 
 ```
-implementation 'net.codinux.log:logback-elasticsearch-logger:2.0.1'
+implementation 'net.codinux.log:logback-elasticsearch-logger:2.1.0'
 ```
 
 ### Maven
@@ -18,7 +18,7 @@ implementation 'net.codinux.log:logback-elasticsearch-logger:2.0.1'
 <dependency>
     <groupId>net.codinux.log</groupId>
     <artifactId>logback-elasticsearch-logger</artifactId>
-    <version>2.0.1</version>
+    <version>2.1.0</version>
 </dependency>
 ```
 
@@ -27,7 +27,7 @@ implementation 'net.codinux.log:logback-elasticsearch-logger:2.0.1'
 ### Gradle
 
 ```
-implementation 'net.codinux.log:jboss-logging-elasticsearch-logger:2.0.1'
+implementation 'net.codinux.log:jboss-logging-elasticsearch-logger:2.1.0'
 ```
 
 ### Maven
@@ -36,7 +36,7 @@ implementation 'net.codinux.log:jboss-logging-elasticsearch-logger:2.0.1'
 <dependency>
     <groupId>net.codinux.log</groupId>
     <artifactId>jboss-logging-elasticsearch-logger</artifactId>
-    <version>2.0.1</version>
+    <version>2.1.0</version>
 </dependency>
 ```
 
@@ -45,7 +45,7 @@ implementation 'net.codinux.log:jboss-logging-elasticsearch-logger:2.0.1'
 ### Gradle
 
 ```
-implementation 'net.codinux.log:java-util-logging-elasticsearch-logger:2.0.1'
+implementation 'net.codinux.log:java-util-logging-elasticsearch-logger:2.1.0'
 ```
 
 ### Maven
@@ -54,7 +54,7 @@ implementation 'net.codinux.log:java-util-logging-elasticsearch-logger:2.0.1'
 <dependency>
     <groupId>net.codinux.log</groupId>
     <artifactId>java-util-logging-elasticsearch-logger</artifactId>
-    <version>2.0.1</version>
+    <version>2.1.0</version>
 </dependency>
 ```
 
