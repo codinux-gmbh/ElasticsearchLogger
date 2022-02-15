@@ -31,6 +31,7 @@ open class LoggerSettings(
 
     open var includeStacktrace: Boolean = IncludeStacktraceDefaultValue,
     open var stacktraceFieldName: String = StacktraceDefaultFieldName,
+    open var stacktraceMaxFieldLength: Int = StacktraceMaxFieldLengthDefaultValue,
 
     open var includeMdc: Boolean = IncludeMdcDefaultValue,
     open var mdcKeysPrefix: String? = MdcFieldsPrefixDefaultValue,
@@ -93,6 +94,8 @@ open class LoggerSettings(
         const val IncludeStacktraceDefaultValue = true
         const val IncludeStacktraceDefaultValueString = "true"
         const val StacktraceDefaultFieldName = "stacktrace"
+        const val StacktraceMaxFieldLengthDefaultValue = 32766 - 100 // subtract a little buffer
+        const val StacktraceMaxFieldLengthDefaultValueString = StacktraceMaxFieldLengthDefaultValue.toString()
 
         const val IncludeMdcDefaultValue = true
         const val IncludeMdcDefaultValueString = "true"

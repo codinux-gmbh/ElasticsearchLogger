@@ -54,6 +54,7 @@ abstract class PropertyProviderBase {
 
             getIncludeField("stacktrace", LoggerSettings.IncludeStacktraceDefaultValue),
             getFieldName("stacktrace", LoggerSettings.StacktraceDefaultFieldName),
+            getIntProperty("stacktrace", LoggerSettings.StacktraceMaxFieldLengthDefaultValue),
 
             getIncludeField("mdc", LoggerSettings.IncludeMdcDefaultValue),
             getNullableStringProperty("mdcprefix", LoggerSettings.MdcFieldsPrefixDefaultValue),

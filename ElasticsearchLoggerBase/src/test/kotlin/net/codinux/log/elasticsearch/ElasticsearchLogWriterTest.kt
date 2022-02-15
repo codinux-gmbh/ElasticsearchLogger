@@ -6,10 +6,9 @@ import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import net.codinux.log.elasticsearch.util.TestDataCreator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.atLeast
-import org.mockito.kotlin.reset
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.verifyNoMoreInteractions
+import org.mockito.Mockito.`when`
+import org.mockito.kotlin.*
+import java.io.PrintWriter
 
 class ElasticsearchLogWriterTest : ElasticsearchTestBase() {
 
@@ -80,6 +79,27 @@ class ElasticsearchLogWriterTest : ElasticsearchTestBase() {
             .withRequestBody(WireMock.containing("\"level\":\"${LogLevel}\"")))
 
         verifyNoMoreInteractions(errorHandlerMock)
+    }
+
+
+    @Test
+    fun stackTraceMaxFieldLength() {
+        val exception = mock<Exception>()
+        `when`(exception.printStackTrace(any<PrintWriter>())).thenAnswer { answer ->
+            val stackTraceMock = "a".repeat(LoggerSettings.StacktraceMaxFieldLengthDefaultValue * 2)
+            val writer: PrintWriter = answer.arguments.first() as PrintWriter
+            writer.write(stackTraceMock)
+            writer.flush()
+            ""
+        }
+
+        val record = createLogRecord(exception = exception)
+
+
+        val result = underTest.createEsRecordJsonPublic(record)
+
+
+        assertThat(result).contains("\"stacktrace\":\"${"a".repeat(LoggerSettings.StacktraceMaxFieldLengthDefaultValue)}\"")
     }
 
 }

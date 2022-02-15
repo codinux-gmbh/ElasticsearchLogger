@@ -319,7 +319,13 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
         val writer = StringWriter()
         record.exception?.printStackTrace(PrintWriter(writer))
 
-        return writer.toString()
+        val stackTrace = writer.toString()
+
+        if (stackTrace.length > settings.stacktraceMaxFieldLength) {
+            return stackTrace.substring(0, settings.stacktraceMaxFieldLength)
+        }
+
+        return stackTrace
     }
 
     private fun extractLoggerName(record: LogRecord): String {
