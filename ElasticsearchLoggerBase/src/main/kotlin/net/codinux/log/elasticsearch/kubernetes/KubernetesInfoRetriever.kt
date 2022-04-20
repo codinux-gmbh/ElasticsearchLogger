@@ -67,8 +67,6 @@ open class KubernetesInfoRetriever {
         var annotations: Map<String, String> = mapOf()
 
         val client = DefaultKubernetesClient()
-        // disable HttpClient's logging, is really very verbose
-        client.httpClient.networkInterceptors().filterIsInstance<HttpLoggingInterceptor>().forEach { it.level = HttpLoggingInterceptor.Level.NONE }
 
         val pod = client.pods().inNamespace(namespace).withName(podName)?.get()
 
