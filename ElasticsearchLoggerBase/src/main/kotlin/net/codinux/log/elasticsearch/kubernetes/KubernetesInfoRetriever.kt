@@ -1,6 +1,7 @@
 package net.codinux.log.elasticsearch.kubernetes
 
 import io.fabric8.kubernetes.client.DefaultKubernetesClient
+import io.fabric8.kubernetes.client.okhttp.OkHttpClientImpl
 import okhttp3.logging.HttpLoggingInterceptor
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -67,6 +68,8 @@ open class KubernetesInfoRetriever {
         var annotations: Map<String, String> = mapOf()
 
         val client = DefaultKubernetesClient()
+        // disable HttpClient's logging, is really very verbose
+        disableVerboseKubernetesClientLogging(client)
 
         val pod = client.pods().inNamespace(namespace).withName(podName)?.get()
 
@@ -107,6 +110,18 @@ open class KubernetesInfoRetriever {
 
         return KubernetesInfo(namespace, podName, podIp, startTime, uid, restartCount, containerName, containerId, imageName, imageId, nodeIp, nodeName,
             clusterName, labels, annotations)
+    }
+
+    private fun disableVerboseKubernetesClientLogging(client: DefaultKubernetesClient) {
+        try {
+            val httpClient = client.httpClient
+            if (httpClient is OkHttpClientImpl) {
+                httpClient.okHttpClient.networkInterceptors().filterIsInstance<HttpLoggingInterceptor>()
+                    .forEach { it.level = HttpLoggingInterceptor.Level.NONE }
+            }
+        } catch (e: Exception) {
+            log.error("Could not disable verbose logging of Kubernetes Client", e)
+        }
     }
 
 }
