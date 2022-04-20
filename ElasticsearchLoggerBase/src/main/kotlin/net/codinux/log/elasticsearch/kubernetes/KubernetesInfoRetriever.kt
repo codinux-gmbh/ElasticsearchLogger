@@ -49,7 +49,7 @@ open class KubernetesInfoRetriever {
         return null
     }
 
-    protected open fun retrieveKubernetesInfo(namespace: String, podName: String, podIp: String): KubernetesInfo? {
+    open fun retrieveKubernetesInfo(namespace: String, podName: String, podIp: String): KubernetesInfo? {
         var containerName: String? = null
         var podIp = podIp
         var nodeIp: String? = null
@@ -66,7 +66,6 @@ open class KubernetesInfoRetriever {
         var labels: Map<String, String> = mapOf()
         var annotations: Map<String, String> = mapOf()
 
-        LoggerFactory.getLogger(HttpLoggingInterceptor::class.java)
         val client = DefaultKubernetesClient()
         // disable HttpClient's logging, is really very verbose
         client.httpClient.networkInterceptors().filterIsInstance<HttpLoggingInterceptor>().forEach { it.level = HttpLoggingInterceptor.Level.NONE }
