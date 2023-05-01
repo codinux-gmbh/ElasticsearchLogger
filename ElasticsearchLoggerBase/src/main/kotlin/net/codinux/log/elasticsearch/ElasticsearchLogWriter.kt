@@ -258,7 +258,7 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
         esRecord.put(prefix + "podIp", info.podIp)
         esRecord.put(prefix + "startTime", info.startTime)
         addIfNotNull(esRecord, prefix, "podUid", info.podUid)
-        esRecord.put(prefix + "restartCount", info.restartCount)
+        addIfNotNull(esRecord, prefix, "restartCount", info.restartCount)
         addIfNotNull(esRecord, prefix, "containerName", info.containerName)
         addIfNotNull(esRecord, prefix, "containerId", info.containerId)
         addIfNotNull(esRecord, prefix, "imageName", info.imageName)

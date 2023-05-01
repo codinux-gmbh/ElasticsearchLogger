@@ -7,7 +7,7 @@ open class KubernetesInfo(
         open val podIp: String,
         open val startTime: String,
         open val podUid: String? = null,
-        open val restartCount: Int = 0,
+        open val restartCount: Int? = null,
         open val containerName: String? = null,
         open val containerId: String? = null,
         open val imageName: String? = null,

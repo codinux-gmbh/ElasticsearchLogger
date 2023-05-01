@@ -71,6 +71,12 @@ implementation 'net.codinux.log:java-util-logging-elasticsearch-logger:2.1.0'
 </dependency>
 ```
 
+## Kubernetes info
+
+ElasticsearchLogger can log information about the Pod and the Kubernetes environment. But in order for this to work the pod must be given the privilege to access the Kubernetes API:
+
+[//]: # ( TODO)
+
 ## Nanosecond timestamp precision
 
 Starting with Elasticsearch 7.0 and Kibana 7.5 timestamps with nanoseconds precision are supported by the new field type `date_nanos`.
