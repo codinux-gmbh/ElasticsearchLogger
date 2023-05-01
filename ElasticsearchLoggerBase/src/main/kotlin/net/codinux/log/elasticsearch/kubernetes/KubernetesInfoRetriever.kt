@@ -44,13 +44,13 @@ open class KubernetesInfoRetriever {
 
             try {
                 return retrieveKubernetesInfo(namespace, podName, podIp)
-            } catch(e: Exception) {
+            } catch(e: Throwable) {
                 log.error("Does the pod have the privilege to access the Kubernetes API (see https://github.com/codinux-gmbh/ElasticsearchLogger#kubernetes-info)? " +
                     "Could not retrieve pod info, only basic data like Kubernetes namespace and Pod name are added to logs, but no cluster or container info", e)
 
                 return KubernetesInfo(namespace, podName, podIp, Instant.now().toString())
             }
-        } catch(e: Exception) {
+        } catch(e: Throwable) {
             log.error("Could not retrieve any pod / Kubernetes info, no cluster or container info will be added to logs", e)
         }
 
