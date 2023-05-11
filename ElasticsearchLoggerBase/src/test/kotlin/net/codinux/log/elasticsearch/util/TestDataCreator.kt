@@ -15,7 +15,7 @@ class TestDataCreator {
 
         const val IndexName = "test-index"
 
-        const val ExceptedElasticsearchUrl = "/_bulk"
+        const val ExceptedElasticsearchUrl = "/$IndexName/_bulk"
 
         private const val ElasticsearchInfoResponseBody = "{\n" +
                 "  \"name\" : \"10bfd6ace8bc\",\n" +
