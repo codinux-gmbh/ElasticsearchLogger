@@ -51,7 +51,7 @@ open class LogbackElasticsearchLogAppender @JvmOverloads constructor(
             event.threadName, hostName, getThrowable(event), event.mdcPropertyMap, event.marker?.name)
     }
 
-    private fun getThrowable(event: ILoggingEvent): Throwable? {
+    protected open fun getThrowable(event: ILoggingEvent): Throwable? {
         event.throwableProxy?.let { proxy ->
             if (proxy is ThrowableProxy) {
                 return proxy.throwable
@@ -63,7 +63,7 @@ open class LogbackElasticsearchLogAppender @JvmOverloads constructor(
         return null
     }
 
-    private fun tryToInstantiateThrowable(proxy: IThrowableProxy): Throwable? {
+    protected open fun tryToInstantiateThrowable(proxy: IThrowableProxy): Throwable? {
         try {
             val throwableClass = Class.forName(proxy.className)
 
@@ -75,7 +75,7 @@ open class LogbackElasticsearchLogAppender @JvmOverloads constructor(
 
             return throwable
         } catch (e: Exception) {
-
+            errorHandler.logError("Could not get Throwable from IThrowableProxy", e)
         }
 
         return null
