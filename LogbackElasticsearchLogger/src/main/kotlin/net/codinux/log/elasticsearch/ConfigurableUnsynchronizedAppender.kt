@@ -20,6 +20,14 @@ abstract class ConfigurableUnsynchronizedAppender(
     settings.host = host
   }
 
+  open fun setUsername(username: String?) {
+    settings.username = username
+  }
+
+  open fun setPassword(password: String?) {
+    settings.password = password
+  }
+
   open fun setIndexName(indexName: String) {
     settings.indexNamePattern = indexName
   }

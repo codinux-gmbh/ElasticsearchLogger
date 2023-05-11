@@ -29,6 +29,9 @@ abstract class PropertyProviderBase {
 
             getElasticsearchPropertyOr("host", LoggerSettings.HostNotSetValue),
 
+            getElasticsearchProperty("username"),
+            getElasticsearchProperty("password"),
+
             indexNamePattern,
             patterns,
 

@@ -6,6 +6,9 @@ open class LoggerSettings(
 
     open var host: String = HostNotSetValue,
 
+    open var username: String? = UsernameDefaultValue,
+    open var password: String? = PasswordDefaultValue,
+
     open var indexNamePattern: String = IndexNameDefaultValue,
     open var patternsInIndexName: List<MatchResult> = listOf(),
 
@@ -62,6 +65,12 @@ open class LoggerSettings(
         const val EnabledDefaultValueString = "true"
 
         const val HostNotSetValue = "null"
+
+        val UsernameDefaultValue: String? = null
+        const val UsernameDefaultValueString = "null"
+
+        val PasswordDefaultValue: String? = null
+        const val PasswordDefaultValueString = "null"
 
         const val IndexNameDefaultValue = "logs"
 

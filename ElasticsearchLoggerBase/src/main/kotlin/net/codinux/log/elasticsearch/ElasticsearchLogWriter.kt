@@ -13,8 +13,12 @@ import org.elasticsearch.client.RequestOptions
 import java.io.PrintWriter
 import org.elasticsearch.client.RestClient
 import org.apache.http.HttpHost
+import org.apache.http.auth.AuthScope
+import org.apache.http.auth.UsernamePasswordCredentials
+import org.apache.http.impl.client.BasicCredentialsProvider
 import org.elasticsearch.action.bulk.BulkRequest
 import org.elasticsearch.action.bulk.BulkResponse
+import org.elasticsearch.client.RestClientBuilder
 import java.io.StringWriter
 import java.time.Instant
 import java.time.ZoneOffset
@@ -42,7 +46,7 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
 
     protected open val indexNameConverter = ElasticsearchIndexNameConverter()
 
-    protected open val restClient: RestHighLevelClient = RestHighLevelClient(RestClient.builder(HttpHost.create(settings.host)))
+    protected open val restClient: RestHighLevelClient = RestHighLevelClient(createLowLevelRestClient())
 
     protected open val mapper = ObjectMapper()
 
@@ -63,6 +67,20 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
 
     init {
         errorHandler.logInfo("Logging to index '${settings.indexNamePattern}' on host ${settings.host}")
+    }
+
+
+    protected open fun createLowLevelRestClient(): RestClientBuilder {
+        return RestClient.builder(HttpHost.create(settings.host)).setHttpClientConfigCallback { clientBuilder ->
+            if (settings.username != null && settings.password != null) {
+                val credentialsProvider = BasicCredentialsProvider()
+                credentialsProvider.setCredentials(AuthScope.ANY, UsernamePasswordCredentials(settings.username, settings.password))
+
+                clientBuilder.setDefaultCredentialsProvider(credentialsProvider)
+            }
+
+            clientBuilder
+        }
     }
 
 
