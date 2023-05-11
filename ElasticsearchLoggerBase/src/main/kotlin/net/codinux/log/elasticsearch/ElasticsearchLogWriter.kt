@@ -6,19 +6,16 @@ import net.codinux.log.elasticsearch.errorhandler.ErrorHandler
 import net.codinux.log.elasticsearch.errorhandler.OnlyOnceErrorHandler
 import net.codinux.log.elasticsearch.errorhandler.StdErrErrorHandler
 import net.codinux.log.elasticsearch.kubernetes.KubernetesInfo
-import org.elasticsearch.client.RestHighLevelClient
-import org.elasticsearch.action.index.IndexRequest
-import org.elasticsearch.common.xcontent.XContentType
-import org.elasticsearch.client.RequestOptions
-import java.io.PrintWriter
-import org.elasticsearch.client.RestClient
 import org.apache.http.HttpHost
 import org.apache.http.auth.AuthScope
 import org.apache.http.auth.UsernamePasswordCredentials
 import org.apache.http.impl.client.BasicCredentialsProvider
 import org.elasticsearch.action.bulk.BulkRequest
 import org.elasticsearch.action.bulk.BulkResponse
-import org.elasticsearch.client.RestClientBuilder
+import org.elasticsearch.action.index.IndexRequest
+import org.elasticsearch.client.*
+import org.elasticsearch.xcontent.XContentType
+import java.io.PrintWriter
 import java.io.StringWriter
 import java.time.Instant
 import java.time.ZoneOffset
@@ -26,7 +23,6 @@ import java.time.format.DateTimeFormatter
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.Exception
 import kotlin.concurrent.thread
 
 
@@ -46,7 +42,10 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
 
     protected open val indexNameConverter = ElasticsearchIndexNameConverter()
 
-    protected open val restClient: RestHighLevelClient = RestHighLevelClient(createLowLevelRestClient())
+    protected open val restClient: RestHighLevelClient = RestHighLevelClientBuilder(createLowLevelRestClient().build())
+        // so that ES 7 RestHighLevelClient is able to communicate with ES 8, see https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/current/migrate-hlrc.html
+        .setApiCompatibilityMode(true)
+        .build()
 
     protected open val mapper = ObjectMapper()
 
