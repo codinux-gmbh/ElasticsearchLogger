@@ -14,8 +14,8 @@ class ElasticsearchLogWriterTest : ElasticsearchTestBase() {
 
     private val underTest = object : ElasticsearchLogWriter(settings, errorHandlerMock) {
 
-        fun createEsRecordJsonPublic(record: LogRecord): String {
-            return super.createEsRecordJson(record)
+        fun mapToEsRecordPublic(record: LogRecord): Map<String, Any> {
+            return super.mapToEsRecord(record)
         }
 
     }
@@ -26,9 +26,10 @@ class ElasticsearchLogWriterTest : ElasticsearchTestBase() {
         settings.mdcKeysPrefix = null
         val record = createLogRecord(mdc = mapOf("key1" to "value 1", "other_context" to "other value"))
 
-        val result = underTest.createEsRecordJsonPublic(record)
+        val result = underTest.mapToEsRecordPublic(record)
 
-        assertThat(result).contains("\"key1\":\"value 1\",\"other_context\":\"other value\"")
+        assertThat(result["key1"]).isEqualTo("value 1")
+        assertThat(result["other_context"]).isEqualTo("other value")
     }
 
     @Test
@@ -36,9 +37,10 @@ class ElasticsearchLogWriterTest : ElasticsearchTestBase() {
         settings.mdcKeysPrefix = "mdc"
         val record = createLogRecord(mdc = mapOf("key1" to "value 1", "other_context" to "other value"))
 
-        val result = underTest.createEsRecordJsonPublic(record)
+        val result = underTest.mapToEsRecordPublic(record)
 
-        assertThat(result).contains("\"mdc.key1\":\"value 1\",\"mdc.other_context\":\"other value\"")
+        assertThat(result["mdc.key1"]).isEqualTo("value 1")
+        assertThat(result["mdc.other_context"]).isEqualTo("other value")
     }
 
 
@@ -96,10 +98,10 @@ class ElasticsearchLogWriterTest : ElasticsearchTestBase() {
         val record = createLogRecord(exception = exception)
 
 
-        val result = underTest.createEsRecordJsonPublic(record)
+        val result = underTest.mapToEsRecordPublic(record)
 
 
-        assertThat(result).contains("\"stacktrace\":\"${"a".repeat(LoggerSettings.StacktraceMaxFieldLengthDefaultValue)}\"")
+        assertThat(result["stacktrace"]).isEqualTo("a".repeat(LoggerSettings.StacktraceMaxFieldLengthDefaultValue))
     }
 
 }

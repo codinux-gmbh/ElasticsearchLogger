@@ -1,11 +1,10 @@
 package net.codinux.log.elasticsearch.converter
 
 import net.codinux.log.elasticsearch.errorhandler.ErrorHandler
-import org.elasticsearch.common.Strings
 import java.time.Instant
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
-import java.util.*
+import java.util.Collections.unmodifiableSet
 
 
 open class ElasticsearchIndexNameConverter @JvmOverloads constructor(
@@ -20,7 +19,9 @@ open class ElasticsearchIndexNameConverter @JvmOverloads constructor(
     val InvalidIndexNameStartCharacters = listOf('_', '-', '+')
 
     @JvmStatic
-    val InvalidIndexNameCharacters: Set<Char>
+    val InvalidIndexNameCharacters: Set<Char> = unmodifiableSet(
+      setOf('\\', '/', '*', '?', '"', '<', '>', '|', ' ', ',', ':')
+    )
 
     @JvmStatic
     val UpperCaseRegex = Regex("[A-Z]")
@@ -29,13 +30,6 @@ open class ElasticsearchIndexNameConverter @JvmOverloads constructor(
     val DatePatternRegex = Regex("%date\\{([0-9A-Za-z-_.:,'+]+)}")
 
     const val PatternsMaskString = "hijklmnopqrstuvwxyz-hijklmnopqrstuvwxyz-hijklmnopqrstuvwxyz-hijklmnopqrstuvwxyz"
-
-    init {
-      val invalidCharacters = Strings.INVALID_FILENAME_CHARS.toMutableSet()
-      invalidCharacters.add(':')
-
-      InvalidIndexNameCharacters = Collections.unmodifiableSet(invalidCharacters)
-    }
 
   }
 
@@ -67,13 +61,11 @@ open class ElasticsearchIndexNameConverter @JvmOverloads constructor(
       validIndexName = validIndexName.replace(validIndexName, replacement)
     }
 
-    if (Strings.validFileName(indexName) == false || indexName.contains(':')) {
-      InvalidIndexNameCharacters.forEach { invalidCharacter ->
-        if (validIndexName.contains(invalidCharacter)) {
-          errorHandler.logInfo("Elasticsearch index names may not contain '$invalidCharacter'. Replacing it with '$invalidCharactersReplacement'.")
+    InvalidIndexNameCharacters.forEach { invalidCharacter ->
+      if (validIndexName.contains(invalidCharacter)) {
+        errorHandler.logInfo("Elasticsearch index names may not contain '$invalidCharacter'. Replacing it with '$invalidCharactersReplacement'.")
 
-          validIndexName = validIndexName.replace(invalidCharacter.toString(), invalidCharactersReplacement)
-        }
+        validIndexName = validIndexName.replace(invalidCharacter.toString(), invalidCharactersReplacement)
       }
     }
 

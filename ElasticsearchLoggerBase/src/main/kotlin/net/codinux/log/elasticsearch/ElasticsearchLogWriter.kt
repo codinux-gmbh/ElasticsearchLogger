@@ -1,6 +1,5 @@
 package net.codinux.log.elasticsearch
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import net.codinux.log.elasticsearch.converter.ElasticsearchIndexNameConverter
 import net.codinux.log.elasticsearch.errorhandler.ErrorHandler
 import net.codinux.log.elasticsearch.errorhandler.OnlyOnceErrorHandler
@@ -10,11 +9,12 @@ import org.apache.http.HttpHost
 import org.apache.http.auth.AuthScope
 import org.apache.http.auth.UsernamePasswordCredentials
 import org.apache.http.impl.client.BasicCredentialsProvider
-import org.elasticsearch.action.bulk.BulkRequest
-import org.elasticsearch.action.bulk.BulkResponse
-import org.elasticsearch.action.index.IndexRequest
-import org.elasticsearch.client.*
-import org.elasticsearch.xcontent.XContentType
+import org.opensearch.client.RestClient
+import org.opensearch.client.json.jackson.JacksonJsonpMapper
+import org.opensearch.client.opensearch.OpenSearchClient
+import org.opensearch.client.opensearch.core.BulkRequest
+import org.opensearch.client.opensearch.core.BulkResponse
+import org.opensearch.client.transport.rest_client.RestClientTransport
 import java.io.PrintWriter
 import java.io.StringWriter
 import java.security.cert.X509Certificate
@@ -41,16 +41,11 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
     }
 
 
-    protected open val recordsQueue = CopyOnWriteArrayList<String>()
+    protected open val recordsQueue = CopyOnWriteArrayList<Map<String, Any>>()
 
     protected open val indexNameConverter = ElasticsearchIndexNameConverter()
 
-    protected open val restClient: RestHighLevelClient = RestHighLevelClientBuilder(createLowLevelRestClient().build())
-        // so that ES 7 RestHighLevelClient is able to communicate with ES 8, see https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/current/migrate-hlrc.html
-        .setApiCompatibilityMode(true)
-        .build()
-
-    protected open val mapper = ObjectMapper()
+    protected open val esClient = OpenSearchClient(RestClientTransport(createRestClient(), JacksonJsonpMapper()))
 
     protected open val handleRecords = AtomicBoolean(true)
 
@@ -72,7 +67,7 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
     }
 
 
-    protected open fun createLowLevelRestClient(): RestClientBuilder {
+    protected open fun createRestClient(): RestClient {
         return RestClient.builder(HttpHost.create(settings.host)).setHttpClientConfigCallback { clientBuilder ->
             clientBuilder.apply {
                 if (settings.username != null && settings.password != null) {
@@ -86,7 +81,7 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
                     clientBuilder.setSSLContext(createDisableCertificateCheckSslContext())
                 }
             }
-        }
+        }.build()
     }
 
     protected open fun createDisableCertificateCheckSslContext(): SSLContext {
@@ -128,8 +123,9 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
             try {
                 val response = sendRecords(recordsToSend)
 
-                if (response.hasFailures()) {
-                    errorHandler.logError("Could not send log records to Elasticsearch: ${response.status()} ${response.buildFailureMessage()}")
+                if (response?.errors() == true) {
+                    val errors = response.items().filter { it.error() != null }.joinToString { "${it.status()}: ${it.error()?.reason()}" }
+                    errorHandler.logError("Could not send log records to Elasticsearch: $errors")
 
                     reAddFailedItemsToQueue(response, recordsToSend)
                 }
@@ -143,30 +139,37 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
         }
     }
 
-    protected open fun sendRecords(recordsToSend: List<String>): BulkResponse {
-        val bulkRequest = createBulkRequest(recordsToSend)
-
-        return restClient.bulk(bulkRequest, RequestOptions.DEFAULT)
+    protected open fun sendRecords(recordsToSend: List<Map<String, Any>>): BulkResponse? {
+        return try {
+            esClient.bulk { builder ->
+                createBulkRequest(builder, recordsToSend)
+            }
+        } catch (e: Exception) {
+            errorHandler.logError("Could not send records with EsClient", e)
+            null
+        }
     }
 
-    protected open fun createBulkRequest(recordsToSend: List<String>): BulkRequest {
-        val indexName = getIndexName(settings)
-        val bulkRequest = BulkRequest(indexName)
+    private fun createBulkRequest(builder: BulkRequest.Builder, recordsToSend: List<Map<String, Any>>): BulkRequest.Builder {
+        builder.index(getIndexName(settings))
 
         recordsToSend.forEach { recordJson ->
-            val request = IndexRequest(indexName)
-            request.source(recordJson, XContentType.JSON)
-            bulkRequest.add(request)
+            builder.operations { op ->
+                op.index<Map<String, Any>> { index ->
+                    index.document(recordJson)
+                }
+                op
+            }
         }
 
-        return bulkRequest
+        return builder
     }
 
     protected open fun getIndexName(settings: LoggerSettings): String {
         return indexNameConverter.resolvePatterns(settings.indexNamePattern, settings.patternsInIndexName, errorHandler)
     }
 
-    protected open fun calculateRecordsToSend(): List<String> {
+    protected open fun calculateRecordsToSend(): List<Map<String, Any>> {
         val size = recordsQueue.size
 
         if (size <= settings.maxLogRecordsPerBatch) {
@@ -188,23 +191,23 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
         }
     }
 
-    protected open fun reAddFailedItemsToQueue(response: BulkResponse, sentRecords: List<String>) {
-        response.items.forEachIndexed { index, item ->
-            if (item.isFailed) {
+    protected open fun reAddFailedItemsToQueue(response: BulkResponse, sentRecords: List<Map<String, Any>>) {
+        response.items().forEachIndexed { index, item ->
+            if (item.error() !=  null) {
                 val failedRecord = sentRecords[index]
                 recordsQueue.add(recordsQueue.size, failedRecord)
             }
         }
     }
 
-    protected open fun reAddSentItemsToQueue(sentRecords: List<String>) {
+    protected open fun reAddSentItemsToQueue(sentRecords: List<Map<String, Any>>) {
         recordsQueue.addAll(recordsQueue.size, sentRecords)
     }
 
 
     override fun writeRecord(record: LogRecord) {
         try {
-            val recordJson = createEsRecordJson(record)
+            val recordJson = mapToEsRecord(record)
 
             if (isClosed.get()) { // don't know if that ever will be the case: if close has been called, send all records immediately, don't hesitate anymore
                 sendRecords(listOf(recordJson))
@@ -215,6 +218,7 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
                 recordsQueue.add(recordJson)
 
                 while (recordsQueue.size > settings.maxBufferedLogRecords) {
+                    // TODO: log warning that buffer size has been exceeded
                     recordsQueue.removeLast()
                 }
             }
@@ -240,12 +244,6 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
         }
     }
 
-
-    protected open fun createEsRecordJson(record: LogRecord): String {
-        val esRecord = mapToEsRecord(record)
-
-        return mapper.writeValueAsString(esRecord)
-    }
 
     protected open fun mapToEsRecord(record: LogRecord): Map<String, Any> {
         val esRecord = mutableMapOf<String, Any>()
