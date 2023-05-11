@@ -14,7 +14,6 @@ open class KubernetesInfo(
         open val imageId: String? = null,
         open val nodeIp: String? = null,
         open val nodeName: String? = null,
-        open val clusterName: String? = null,
         open val labels: Map<String, String> = mapOf(),
         open val annotations: Map<String, String> = mapOf()
 )

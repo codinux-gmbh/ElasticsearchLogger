@@ -69,7 +69,6 @@ open class KubernetesInfoRetriever {
         var imageId: String? = null
         var restartCount = 0
         var uid: String? = null
-        var clusterName: String? = null
 
         var labels: Map<String, String> = mapOf()
         var annotations: Map<String, String> = mapOf()
@@ -83,7 +82,6 @@ open class KubernetesInfoRetriever {
         pod?.apply {
             metadata?.apply {
                 uid = this.uid // a string like 2e8e9f1e-7df3-48d4-a0fa-908b042bc63b // TODO: needed?
-                clusterName = this.clusterName // will this ever be != null ?
 
                 labels = this.labels ?: mapOf()
                 annotations = this.annotations ?: mapOf()
@@ -116,7 +114,7 @@ open class KubernetesInfoRetriever {
         }
 
         return KubernetesInfo(namespace, podName, podIp, startTime, uid, restartCount, containerName, containerId, imageName, imageId, nodeIp, nodeName,
-            clusterName, labels, annotations)
+            labels, annotations)
     }
 
     private fun disableVerboseKubernetesClientLogging(client: DefaultKubernetesClient) {

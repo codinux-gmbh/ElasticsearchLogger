@@ -14,7 +14,9 @@ dependencies {
     implementation "org.opensearch.client:opensearch-rest-client:2.7.0"
     implementation "org.opensearch.client:opensearch-java:2.4.0"
 
-    implementation "io.fabric8:kubernetes-client:5.12.2"
+    implementation "io.fabric8:kubernetes-client:$fabric8KubernetesClientVersion"
+    // TODO: or use JDK HttpClient? Wouldn't conflict with other OkHttp usages
+    implementation("io.fabric8:kubernetes-httpclient-okhttp:$fabric8KubernetesClientVersion")
 
 
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"

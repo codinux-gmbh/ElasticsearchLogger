@@ -302,7 +302,6 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
         addIfNotNull(esRecord, prefix, "imageId", info.imageId)
         addIfNotNull(esRecord, prefix, "nodeIp", info.nodeIp)
         addIfNotNull(esRecord, prefix, "node", info.nodeName)
-        addIfNotNull(esRecord, prefix, "clusterName", info.clusterName)
 
         if (settings.includeKubernetesLabels) {
             val labelsPrefix = prefix + determinePrefix(settings.kubernetesLabelsPrefix)
