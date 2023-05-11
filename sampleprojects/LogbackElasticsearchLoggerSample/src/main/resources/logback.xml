@@ -3,6 +3,7 @@
     <appender name="ELASTICSEARCH" class="net.codinux.log.elasticsearch.LogbackElasticsearchLogAppender">
         <enabled>true</enabled>
         <host>http://localhost:9200</host>
+        <disableCertificateCheck>true</disableCertificateCheck>
         <indexName>log</indexName>
         <messageFieldName>message</messageFieldName>
         <timestampResolution>millis</timestampResolution>
@@ -11,7 +12,7 @@
         <logLevelFieldName>level</logLevelFieldName>
         <includeLogger>true</includeLogger>
         <loggerFieldName>logger</loggerFieldName>
-        <includeLoggerName>false</includeLoggerName>
+        <includeLoggerName>true</includeLoggerName>
         <loggerNameFieldName>loggerName</loggerNameFieldName>
         <includeThreadName>true</includeThreadName>
         <threadNameFieldName>thread</threadNameFieldName>

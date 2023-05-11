@@ -9,6 +9,8 @@ open class LoggerSettings(
     open var username: String? = UsernameDefaultValue,
     open var password: String? = PasswordDefaultValue,
 
+    open var disableCertificateCheck: Boolean = DisableCertificateCheckDefaultValue,
+
     open var indexNamePattern: String = IndexNameDefaultValue,
     open var patternsInIndexName: List<MatchResult> = listOf(),
 
@@ -71,6 +73,9 @@ open class LoggerSettings(
 
         val PasswordDefaultValue: String? = null
         const val PasswordDefaultValueString = "null"
+
+        const val DisableCertificateCheckDefaultValue: Boolean = false
+        const val DisableCertificateCheckDefaultValueString = "false"
 
         const val IndexNameDefaultValue = "logs"
 

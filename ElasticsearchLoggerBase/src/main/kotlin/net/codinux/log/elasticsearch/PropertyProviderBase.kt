@@ -32,6 +32,8 @@ abstract class PropertyProviderBase {
             getElasticsearchProperty("username"),
             getElasticsearchProperty("password"),
 
+            getBooleanElasticsearchProperty("disable-certificate-check"),
+
             indexNamePattern,
             patterns,
 
@@ -120,6 +122,10 @@ abstract class PropertyProviderBase {
 
     protected open fun getElasticsearchProperty(propertyName: String): String? {
         return getProperty("log.elasticsearch.$propertyName")
+    }
+
+    protected open fun getBooleanElasticsearchProperty(propertyName: String): Boolean {
+      return getElasticsearchProperty(propertyName).toBoolean()
     }
 
 }

@@ -17,12 +17,15 @@ import org.elasticsearch.client.*
 import org.elasticsearch.xcontent.XContentType
 import java.io.PrintWriter
 import java.io.StringWriter
+import java.security.cert.X509Certificate
 import java.time.Instant
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
+import javax.net.ssl.SSLContext
+import javax.net.ssl.X509TrustManager
 import kotlin.concurrent.thread
 
 
@@ -71,15 +74,34 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
 
     protected open fun createLowLevelRestClient(): RestClientBuilder {
         return RestClient.builder(HttpHost.create(settings.host)).setHttpClientConfigCallback { clientBuilder ->
-            if (settings.username != null && settings.password != null) {
-                val credentialsProvider = BasicCredentialsProvider()
-                credentialsProvider.setCredentials(AuthScope.ANY, UsernamePasswordCredentials(settings.username, settings.password))
+            clientBuilder.apply {
+                if (settings.username != null && settings.password != null) {
+                    val credentialsProvider = BasicCredentialsProvider()
+                    credentialsProvider.setCredentials(AuthScope.ANY, UsernamePasswordCredentials(settings.username, settings.password))
 
-                clientBuilder.setDefaultCredentialsProvider(credentialsProvider)
+                    clientBuilder.setDefaultCredentialsProvider(credentialsProvider)
+                }
+
+                if (settings.disableCertificateCheck) {
+                    clientBuilder.setSSLContext(createDisableCertificateCheckSslContext())
+                }
             }
-
-            clientBuilder
         }
+    }
+
+    protected open fun createDisableCertificateCheckSslContext(): SSLContext {
+        val trustAllCertificatesTrustManager = object : X509TrustManager {
+            override fun getAcceptedIssuers(): Array<X509Certificate?> = arrayOf()
+            override fun checkClientTrusted(certs: Array<X509Certificate?>?, authType: String?) { }
+            override fun checkServerTrusted(certs: Array<X509Certificate?>?, authType: String?) {
+                // trust all certificates
+            }
+        }
+
+        val sslContext = SSLContext.getInstance("TLS")
+        sslContext.init(null, arrayOf(trustAllCertificatesTrustManager), null)
+
+        return sslContext
     }
 
 

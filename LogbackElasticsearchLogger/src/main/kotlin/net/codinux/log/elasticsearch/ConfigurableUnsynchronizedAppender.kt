@@ -28,6 +28,10 @@ abstract class ConfigurableUnsynchronizedAppender(
     settings.password = password
   }
 
+  open fun setDisableCertificateCheck(disableCertificateCheck: Boolean) {
+    settings.disableCertificateCheck = disableCertificateCheck
+  }
+
   open fun setIndexName(indexName: String) {
     settings.indexNamePattern = indexName
   }
