@@ -136,7 +136,7 @@ open class LoggerSettings(
         const val KubernetesAnnotationsPrefixDefaultValue: String = "annotation"
 
         const val MaxLogRecordsPerBatchDefaultValue = 100
-        const val MaxBufferedLogRecordsDefaultValue = 2000
+        const val MaxBufferedLogRecordsDefaultValue = 10_000
         const val SendLogRecordsPeriodMillisDefaultValue = 100L
 
     }

@@ -218,7 +218,8 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
                 recordsQueue.add(recordJson)
 
                 while (recordsQueue.size > settings.maxBufferedLogRecords) {
-                    // TODO: log warning that buffer size has been exceeded
+                    errorHandler.logError("Record queue is full, dropping record. Increase record queue size via maxBufferedLogRecords setting so that log " +
+                        "records don't get lost. Depending on ErrorHandler settings this message may gets printed only once per 30 minutes.")
                     recordsQueue.removeLast()
                 }
             }
