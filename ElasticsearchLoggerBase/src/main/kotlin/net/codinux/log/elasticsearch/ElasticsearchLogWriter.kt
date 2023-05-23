@@ -170,25 +170,19 @@ open class ElasticsearchLogWriter @JvmOverloads constructor(
     }
 
     protected open fun calculateRecordsToSend(): List<Map<String, Any>> {
-        val size = recordsQueue.size
+        val recordsToSend = ArrayList(recordsQueue)
 
-        if (size <= settings.maxLogRecordsPerBatch) {
-            val recordsToSend = ArrayList(recordsQueue)
-
-            recordsQueue.clear()
-
-            return recordsToSend
-        }
-        else {
-            val fromIndex = size - settings.maxLogRecordsPerBatch
-            val recordsToSend = ArrayList(recordsQueue.subList(fromIndex, size)) // make a copy
-
-            while (recordsQueue.size > fromIndex) {
-                recordsQueue.removeAt(fromIndex) // do not call removeAll() as if other records have the same JSON string than all matching strings get removed
+        if (recordsToSend.size > settings.maxLogRecordsPerBatch) {
+            for (index in recordsToSend.size - 1 downTo settings.maxLogRecordsPerBatch) {
+                recordsToSend.removeAt(index)
             }
-
-            return recordsToSend
         }
+
+        for (index in recordsToSend.size - 1 downTo 0) {
+            recordsQueue.removeAt(index)
+        }
+
+        return recordsToSend
     }
 
     protected open fun reAddFailedItemsToQueue(response: BulkResponse, sentRecords: List<Map<String, Any>>) {
